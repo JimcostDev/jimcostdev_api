@@ -12,7 +12,7 @@ def create_contact(new_contact_data: ContactModel):
         new_contact_data (ContactModel): Datos del nuevo contacto.
 
     Returns:
-        ContactModel: Datos del contacto creado.
+        tuple: Una tupla que contiene el contacto y el código de estado HTTP.
     """
     try:
         # Validar los datos del nuevo contacto utilizando el modelo
@@ -49,12 +49,13 @@ def create_contact(new_contact_data: ContactModel):
 
         # Comprobar si la inserción fue exitosa
         if result.inserted_id:
-            # Devolver una instancia del modelo ContactModel
-            return ContactModel(**contact_data).dict()
+            # Devolver una instancia del modelo ContactModel y el código de estado 201
+            return ContactModel(**contact_data).dict(), status.HTTP_201_CREATED
         else:
-            raise ValueError("Error al insertar el contacto en la base de datos.")
+            # Devolver el código de estado 500 si la inserción falla
+            return None, status.HTTP_500_INTERNAL_SERVER_ERROR
     except Exception as ex:
-        # Manejar otras excepciones aquí
+        # Devolver el código de estado 500 y los detalles de la excepción
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error inesperado al crear el contacto: {str(ex)}"

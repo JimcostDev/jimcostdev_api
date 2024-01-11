@@ -27,3 +27,21 @@ class ContactModel(BaseModel):
             }
         }
 
+class ContactResponseModel(ContactModel):
+    id: int = Field(..., description="Identificador único del contacto.", gt=0)
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "_id": 1,
+                "avatar": "https://example.com/imgs/perfil.png",
+                "nationality": "país",
+                "phone_number": "(+34) 624 499234",
+                "i_live_in": "lugar donde vives",
+                "email": "correo@gmail.com",
+                "web": {
+                    "url": "https://www.jimcostdev.com/",
+                    "name": "jimcostdev.com"
+                }
+            }
+        }

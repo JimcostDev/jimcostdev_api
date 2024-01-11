@@ -24,8 +24,14 @@ def create_contact_endpoint(new_contact_data: ContactModel):
         dict: Datos del contacto creado.
     """
     try:
-        created_contact = create_contact(new_contact_data)
-        return created_contact
+        created_contact, http_status = create_contact(new_contact_data)
+        if http_status == status.HTTP_201_CREATED:
+            return created_contact
+        elif http_status == status.HTTP_500_INTERNAL_SERVER_ERROR:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="route: Error inesperado al crear el contacto."
+            )
     except HTTPException as e:
         # Devolver la excepción HTTP con los detalles apropiados
         raise e
@@ -33,5 +39,5 @@ def create_contact_endpoint(new_contact_data: ContactModel):
         # Manejar otras excepciones inesperadas
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error inesperado al crear el contacto: {str(ex)}"
+            detail=f"route: Error inesperado al crear el contacto: {str(ex)}"
         )
