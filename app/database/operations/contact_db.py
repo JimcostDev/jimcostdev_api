@@ -22,8 +22,7 @@ def create_contact(new_contact_data: ContactModel):
         
         # Convertir la URL a una cadena (si es necesario)
         contact_data['avatar'] = str(avatar_url_str)
-        contact_data['web']['url'] = str(web_url_str)
-        
+        contact_data['web']['url'] = str(web_url_str)    
     except ValidationError as e:
         # Manejar errores de validación Pydantic aquí
         raise HTTPException(
@@ -44,9 +43,6 @@ def create_contact(new_contact_data: ContactModel):
         # Insertar el nuevo contacto en la colección 'contact'
         result = db.contact_collection.insert_one(contact_data)
         
-        # Cerrar la conexión a la base de datos
-        db.close_connection()
-
         # Comprobar si la inserción fue exitosa
         if result.inserted_id:
             # Devolver una instancia del modelo ContactModel y el código de estado 201
@@ -60,3 +56,29 @@ def create_contact(new_contact_data: ContactModel):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error inesperado al crear el contacto: {str(ex)}"
         )
+        
+    finally:
+        # Asegurarse de cerrar la conexión a la base de datos
+        db.close_connection()
+
+
+
+def get_contact_info_by_id(id_contact: int) -> dict:
+    try:
+        # Obtener la instancia de la base de datos
+        db = get_database_instance()
+
+        info_contact = db.contact_collection.find_one({"_id": id_contact})
+
+        if info_contact:
+            info_contact['id'] = info_contact.pop('_id')
+            return info_contact, status.HTTP_200_OK
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No se pudo encontrar la información de contacto")
+    except Exception as e:
+        # No es necesario levantar una HTTPException aquí para errores internos
+        # FastAPI responderá automáticamente con un código de estado 500
+        raise e
+    finally:
+        # Asegurarse de cerrar la conexión a la base de datos
+        db.close_connection()

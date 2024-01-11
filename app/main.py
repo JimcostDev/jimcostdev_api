@@ -4,9 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
 app = FastAPI(
-    title="Mi portafolio ",
-    description="Esta es mi API para craer mi portafolio y web",
-    version="0.1.0"
+    title="JimcostDev API ",
+    description="Bienvenido a la API de Mi Portafolio, diseñada para gestionar información sobre mi perfil, proyectos y más.",
+    version="0.1.0",
 )
 
 # Configurar CORS (Cross-Origin Resource Sharing)
