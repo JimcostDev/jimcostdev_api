@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
 app = FastAPI(
-    title="JimcostDev API ",
+    title="JimcostDev API",
     description="Bienvenido a la API de Mi Portafolio, diseñada para gestionar información sobre mi perfil, proyectos y más.",
     version="0.1.0",
 )
