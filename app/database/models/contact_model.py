@@ -11,6 +11,7 @@ class ContactModel(BaseModel):
     i_live_in: str = Field(..., description="Ubicación actual.")
     email: EmailStr = Field(..., description="Dirección de correo electrónico válida.")
     web: WebModel = Field(..., description="Información relacionada con la web.")
+    username: str = Field(..., description="Identificador único de usuario")
     
     class Config:
         json_schema_extra = {
@@ -23,7 +24,8 @@ class ContactModel(BaseModel):
                 "web": {
                     "url": "https://www.jimcostdev.com/",
                     "name": "jimcostdev.com"
-                }
+                },
+                "username": "username"
             }
         }
 
@@ -42,6 +44,7 @@ class ContactResponseModel(ContactModel):
                 "web": {
                     "url": "https://www.jimcostdev.com/",
                     "name": "jimcostdev.com"
-                }
+                },
+                "username": "username"
             }
         }
