@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from pydantic import ValidationError
 from database.conn_db import get_database_instance
 from database.models.contact_model import ContactModel
-from utils.generar_id import obtener_ultimo_id
+from app.utils.generate_id import obtener_ultimo_id
 
 def create_contact(new_contact_data: ContactModel):
     """
