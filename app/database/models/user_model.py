@@ -71,3 +71,8 @@ class UserResponseModel(UserCreateModel):
                 "avatar": "https://example.com/avatar.jpg"
             }
         }
+
+class UserInDB(UserResponseModel):
+    """Schema for User stored in database."""
+    created_at: str = Field(..., description="Fecha de creación del usuario")
+    updated_at: str = Field(..., description="Fecha de última actualización del usuario")

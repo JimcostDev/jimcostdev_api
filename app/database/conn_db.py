@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, TEXT
 import os
 from dotenv import load_dotenv
 
@@ -15,6 +15,12 @@ class Database:
         self.education_collection = self.db['education']
         self.projects_collection = self.db['projects']
         self.certifications_collection = self.db['certifications']
+        self.users_collection = self.db['users']
+        self.customization_collection = self.db['customization']
+        
+        # Crear índices de texto
+        self.users_collection.create_index([("email", TEXT)])
+        self.users_collection.create_index([("username", TEXT)])
 
     def get_db(self):
         return self.db
