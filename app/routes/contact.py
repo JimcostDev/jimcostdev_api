@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from database.operations.contact_db import create_contact, get_contact_info_by_id
+from database.operations.contact_db import create_contact, get_contact_info_by_user
 from database.models.contact_model import ContactModel, ContactResponseModel
 
 router = APIRouter()
@@ -42,13 +42,13 @@ def create_contact_endpoint(new_contact_data: ContactModel):
 
 # CONSULTAR INFO DE CONTACTO
 @router.get(
-    "/contact/{id}", 
+    "/contact/{username}", 
     response_model=ContactResponseModel,
-    summary="Consultar info de contacto por ID",
+    summary="Consultar info de contacto por usuario",
     description="Este endpoint permite obtener la información detallada de contacto"
 )
-def get_contact_endpoint(id_contact: int):
-    info_contact, http_status = get_contact_info_by_id(id_contact)
+def get_contact_endpoint(user_name: str):
+    info_contact, http_status = get_contact_info_by_user(user_name)
     
     if http_status == status.HTTP_200_OK:
         return info_contact
