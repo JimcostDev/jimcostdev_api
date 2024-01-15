@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, constr, EmailStr, HttpUrl
+from pydantic import BaseModel, Field, EmailStr, HttpUrl
 
 class WebModel(BaseModel):
     url: HttpUrl = Field(..., description="La URL debe ser una URL válida.")
