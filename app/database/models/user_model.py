@@ -1,17 +1,16 @@
-from pydantic import BaseModel, Field, EmailStr, HttpUrl, validator, constr
+from pydantic import BaseModel, Field, EmailStr, validator, constr
 from typing import Optional
 
 class GoogleAuthModel(BaseModel):
     user_id: str
 
-class UserCreateModel(BaseModel):
+class UserBase(BaseModel):
     """Schema for creating a User."""
-    username: constr(min_length=4, max_length=20) = Field(..., description="Nombre de usuario (entre 4 y 20 caracteres)")
+    full_name: constr(min_length=2, max_length=50) = Field(..., description="Nombre completo de usuario (entre 2 y 50 caracteres)")
+    username: constr(min_length=4, max_length=20) = Field(..., description="Identidicador de usuario (entre 4 y 20 caracteres)")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
     password: constr(min_length=8)
     confirm_password: constr(min_length=8)
-    avatar: HttpUrl = Field(..., description="URL de la imagen o avatar del usuario")
-    google_auth: Optional[GoogleAuthModel]  # Propiedad para almacenar información de autenticación de Google
     
     @validator('confirm_password')
     def passwords_match(cls, v, values, **kwargs):
@@ -30,13 +29,13 @@ class UserCreateModel(BaseModel):
         if not any(c in '!@#$%^&*:' for c in v):
             raise ValueError('La contraseña debe contener al menos un carácter especial')
         return v
-    
+        
 class UserUpdateModel(BaseModel):
+    full_name: constr(min_length=2, max_length=50) = Field(..., description="Nombre completo de usuario (entre 2 y 50 caracteres)")
     username: constr(min_length=4, max_length=20) = Field(..., description="Nombre de usuario (entre 4 y 20 caracteres)")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
     password: constr(min_length=8) = None
     confirm_password: constr(min_length=8) = None
-    avatar: HttpUrl = Field(..., description="URL de la imagen o avatar del usuario")
     roles: str = None
     reset_password_token: str = None  #propiedad para el token de restablecimiento de contraseña
     
@@ -59,18 +58,33 @@ class UserUpdateModel(BaseModel):
                 raise ValueError('La contraseña debe contener al menos un carácter especial')
         return v
 
-class UserResponseModel(UserCreateModel):
-    id: int = Field(..., description="Identificador único del contacto.", gt=0)
+class UserCreateModel(UserBase):
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "full_name": "Ronaldo Jimenez Acosta",
+                "username": "example_user",
+                "email": "user@example.com",
+                "password": "Password123*",
+                "confirm_password": "Password123*",
+            }
+        }
+    
+class UserResponseModel(UserBase):
+    id: int = Field(..., description="Identificador único del contacto.")
     
     class Config:
         json_schema_extra = {
             "example": {
                 "id": 1,
+                "full_name": "Ronaldo Jimenez Acosta",
                 "username": "example_user",
-                "email": "user@example.com",
-                "avatar": "https://example.com/avatar.jpg"
+                "email": "user@example.com"
             }
         }
+    class Config:
+        # Excluir campos específicos al crear la instancia de UserResponseModel
+        exclude = ["password", "confirm_password"]
 
 class UserInDB(UserResponseModel):
     """Schema for User stored in database."""

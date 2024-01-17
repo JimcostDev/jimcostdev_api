@@ -4,9 +4,13 @@ from dotenv import load_dotenv
 
 class Database:
     def __init__(self, mongo_uri: str):
-        self.client = MongoClient(mongo_uri)
-        self.db = self.client['jimcostdev_api']
+        self.mongo_uri = mongo_uri
+        self.client = None
+        self.db = None
 
+    def __enter__(self):
+        self.client = MongoClient(self.mongo_uri)
+        self.db = self.client['jimcostdev_api']
         # Colecciones en la base de datos
         self.contact_collection = self.db['contact']
         self.social_networks_collection = self.db['social_networks']
@@ -17,16 +21,19 @@ class Database:
         self.certifications_collection = self.db['certifications']
         self.users_collection = self.db['users']
         self.customization_collection = self.db['customization']
-        
+
         # Crear índices de texto
-        self.users_collection.create_index([("email", TEXT)])
-        self.users_collection.create_index([("username", TEXT)])
+        #self.users_collection.create_index([("user_email", TEXT)])
+        #self.users_collection.create_index([("user_username", TEXT)])
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.client:
+            self.client.close()
 
     def get_db(self):
         return self.db
-
-    def close_connection(self):
-        self.client.close()
 
 # Función para obtener una instancia de la base de datos
 def get_database_instance():
@@ -35,5 +42,4 @@ def get_database_instance():
     mongo_uri = os.getenv("MONGO_URI")
 
     # Instanciar la clase Database para manejar la conexión
-    db = Database(mongo_uri)
-    return db
+    return Database(mongo_uri)

@@ -5,7 +5,6 @@ class WebModel(BaseModel):
     name: str = Field(..., description="Tag para la personalización")
 
 class ContactModel(BaseModel):
-    avatar: HttpUrl = Field(..., description="URL de la imagen del avatar.")
     nationality:  str = Field(..., description="Tu nacionalidad, longitud entre 1 y 50 caracteres.")
     phone_number: str = Field(..., description="Número de teléfono de contacto.")
     i_live_in: str = Field(..., description="Ubicación actual.")
@@ -16,7 +15,6 @@ class ContactModel(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "avatar": "https://example.com/imgs/perfil.png",
                 "nationality": "país",
                 "phone_number": "(+34) 624 499234",
                 "i_live_in": "lugar donde vives",
@@ -36,7 +34,6 @@ class ContactResponseModel(ContactModel):
         json_schema_extra = {
             "example": {
                 "_id": 1,
-                "avatar": "https://example.com/imgs/perfil.png",
                 "nationality": "país",
                 "phone_number": "(+34) 624 499234",
                 "i_live_in": "lugar donde vives",

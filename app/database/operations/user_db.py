@@ -1,88 +1,87 @@
 from fastapi import HTTPException, status
+from fastapi.exceptions import ResponseValidationError
 from pydantic import ValidationError
 from database.conn_db import get_database_instance
-from database.models.contact_model import UserCreateModel, UserUpdateModel, UserResponseModel
+from database.models.user_model import UserCreateModel
 from utils.generate_id import obtener_ultimo_id
-from utils.hash_and_verify_password import hash_password, verify_password
+from utils.hash_and_verify_password import hash_password
 from datetime import datetime
+from pymongo.errors import PyMongoError
 
-
-# Verificar si usuario existe por email o username
-def user_exists(identifier: str) -> bool:
-    db = get_database_instance()
-    # Determinar si el identificador parece ser un correo electrónico o un nombre de usuario
-    conditions = {}
-    if "@" in identifier:  # Si hay un "@" en el identificador, asumimos que es un correo electrónico
-        conditions["email"] = {"$regex": f"^{identifier}$", "$options": "i"}
-    else:  # En caso contrario, asumimos que es un nombre de usuario
-        conditions["username"] = {"$regex": f"^{identifier}$", "$options": "i"}
-
-    existing_user = db.users_collection.find_one(conditions)
-    return existing_user is not None
-    
-# CREAR USUARIO
-async def create_user(user_data_data: UserCreateModel):
-    """
-    Crea un nuevo usuario en la base de datos.
-
-    Args:
-        user_data_data (UserCreateModel): Datos del nuevo usuario.
-
-    Returns:
-        tuple: Una tupla que contiene el usuario y el código de estado HTTP.
-    """
+# verificar si usuario existe
+def user_exists_by_email(db, user_email: str) -> bool:
     try:
-        user_data = user_data_data.dict(exclude_unset=True)  # Excluir campos no configurados
-        user_data['avatar'] = str(user_data['avatar'])  # Convertir la URL a una cadena
-        user_data['created_at'] = str(datetime.utcnow())
-        user_data['updated_at'] = str(datetime.utcnow())
-        user_data['roles'] = ['user'] 
-        
-        # Excluir el campo 'confirm_password' antes de la inserción
-        user_data.pop('confirm_password', None)
-    
-        # Hashear la contraseña antes de guardarla en la base de datos
-        hashed_password = hash_password(user_data_data.password)
-        user_data['password'] = hashed_password   
-        
-    except ValidationError as e:
-        # Manejar errores de validación Pydantic aquí
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Error de validación: {e.errors()}"
-        )
+        existing_user = db.users_collection.find_one({"email": {"$regex": f"^{user_email}$", "$options": "i"}})
+        return existing_user is not None
+    except PyMongoError as e:
+        # Aquí puedes manejar la excepción según tus necesidades
+        print(f"Error al buscar usuario en la base de datos: {e}")
+        return False
 
+def user_exists_by_username(db, username: str) -> bool:
     try:
-        # Obtener la instancia de la base de datos
-        db = get_database_instance()
-        
-        # Verificar si el usuario ya existe
-        if user_exists(user_data['email']) or user_exists(user_data['username']) :
-            return None, status.HTTP_409_CONFLICT  # Retorna None con un código de conflicto si el usuario ya existe
-        
-        # Obtener el último id de la colección 
-        ultimo_id = obtener_ultimo_id(db.users_collection)
+        existing_user = db.users_collection.find_one({"username": {"$regex": f"^{username}$", "$options": "i"}})
+        return existing_user is not None
+    except PyMongoError as e:
+        # Aquí puedes manejar la excepción según tus necesidades
+        print(f"Error al buscar usuario en la base de datos: {e}")
+        return False
 
-        # Asignar el nuevo id al documento 
-        user_data["_id"] = ultimo_id
+def create_user(new_user_data: UserCreateModel):
+    with get_database_instance() as db:
+        try:
+            # Validate fields
+            user_data = new_user_data.dict(exclude_unset=True)
+            
+            # Add fields
+            user_data['created_at'] = str(datetime.utcnow())
+            user_data['updated_at'] = str(datetime.utcnow())
+            user_data['roles'] = ['user']
+            
+            # Remove 'confirm_password' before insertion and hashed 'password'
+            user_data.pop('confirm_password', None)
+            hashed_password = hash_password(new_user_data.password)
+            user_data['password'] = hashed_password
+            
+            if user_exists_by_email(db, user_data['email']):
+                    return None, status.HTTP_409_CONFLICT
+                
+            if user_exists_by_username(db, user_data['username']):
+                    return None, status.HTTP_409_CONFLICT
+            
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Error de validación: {e.errors()}"
+            )
 
-        # Insertar el nuevo usuario en la colección 
-        result = db.users_collection.insert_one(user_data)
-        
-        # Comprobar si la inserción fue exitosa
-        if result.inserted_id:
-            # Devolver una instancia del modelo y el código de estado 201
-            return UserCreateModel(**user_data).dict(), status.HTTP_201_CREATED
-        else:
-            # Devolver el código de estado 500 si la inserción falla
-            return None, status.HTTP_500_INTERNAL_SERVER_ERROR
-    except Exception as ex:
-        # Devolver el código de estado 500 y los detalles de la excepción
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error inesperado al crear el usuario: {str(ex)}"
-        )
-        
-    finally:
-        # Asegurarse de cerrar la conexión a la base de datos
-        db.close_connection()
+        try:
+            
+            # Get the last id from the collection
+            ultimo_id = obtener_ultimo_id(db.users_collection)
+
+            # Assign the new id to the document
+            user_data['_id'] = ultimo_id
+
+            # Insert the new user into the collection
+            
+            result = db.users_collection.insert_one(user_data)
+    
+            if result.inserted_id:
+                # Return the user data along with status code 201
+                return new_user_data.dict(), status.HTTP_201_CREATED
+            else:
+                # Return status code 500 if insertion fails
+                return None, status.HTTP_500_INTERNAL_SERVER_ERROR
+        except PyMongoError as ex:
+            print(f"PyMongoError(): Error al insertar usuario: {ex}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"PyMongoError(): Error inesperado al crear el usuario. {ex}"
+            )
+        except Exception as ex:
+            print(f"Error al insertar usuario: {ex}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error inesperado al crear el usuario. {ex}"
+            )

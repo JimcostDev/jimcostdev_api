@@ -1,0 +1,5 @@
+use("jimcostdev_api")
+db.users.getIndexes()
+//db.users.dropIndex("user_email_text")
+
+
