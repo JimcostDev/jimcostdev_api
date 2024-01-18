@@ -1,3 +1,4 @@
+from fastapi.responses import HTMLResponse
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,12 +19,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/", tags=['main'])
-def read_root():
-    return {"message": "Hola Mundo!"}
-
 # Agregar la ruta para servir archivos estáticos, incluido el favicon
-app.mount("/static", StaticFiles(directory="assets"), name="static")
+app.mount("/templates", StaticFiles(directory="templates"), name="templates")
+
+@app.get("/", tags=['main', 'html'], response_class=HTMLResponse)
+def read_root():
+    # Lee el contenido del archivo HTML y devuélvelo como respuesta HTML
+    with open("templates/index.html", "r", encoding="utf-8") as html_file:
+        content = html_file.read()
+    return HTMLResponse(content=content)
 
 # Función para cargar rutas dinámicamente
 def load_routes(app):
