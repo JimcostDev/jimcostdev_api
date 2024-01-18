@@ -4,7 +4,7 @@ from database.conn_db import get_database_instance
 from database.models.contact_model import ContactModel
 from utils.generate_id import obtener_ultimo_id
 
-# CREAR CONTACTO
+# crear contacto
 def create_contact(new_contact_data: ContactModel):
     """
     Crea un nuevo contacto en la base de datos.
@@ -56,7 +56,7 @@ def create_contact(new_contact_data: ContactModel):
             detail=f"Error inesperado al crear el contacto: {str(ex)}"
         )
 
-# OBTENER INFO CONTACTO POR ID
+# obtenert info de contacti por id
 def get_contact_info_by_user(user_name: int) -> dict:
     try:
         # Obtener la instancia de la base de datos

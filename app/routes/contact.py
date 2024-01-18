@@ -4,13 +4,14 @@ from database.models.contact_model import ContactModel, ContactResponseModel
 
 router = APIRouter()
 
-# CREAR INFO DE CONTACTO
+# crear info de contacto
 @router.post(
     "/contact",
+    tags=['contact'],
     response_model=ContactModel,
     status_code=status.HTTP_201_CREATED,
-    summary="Crear un nuevo contacto",
-    description="Crea un nuevo contacto con la información proporcionada."
+    summary="Crear datos de contacto",
+    description="Crea nueva información de contacto con los datos proporcionados."
 )
 def create_contact_endpoint(new_contact_data: ContactModel):
     """
@@ -40,12 +41,13 @@ def create_contact_endpoint(new_contact_data: ContactModel):
             detail=f"Error inesperado al crear el contacto: {str(ex)}"
         )
 
-# CONSULTAR INFO DE CONTACTO
+# consultar info de contacto por usuario
 @router.get(
     "/contact/{username}", 
+    tags=['contact'],
     response_model=ContactResponseModel,
-    summary="Consultar info de contacto por usuario",
-    description="Este endpoint permite obtener la información detallada de contacto"
+    summary="Obtener datos de contacto del usuario",
+    description="Este endpoint permite obtener los datos o la información de contacto del usuario"
 )
 def get_contact_endpoint(user_name: str):
     info_contact, http_status = get_contact_info_by_user(user_name)

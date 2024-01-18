@@ -1,6 +1,5 @@
 from fastapi import HTTPException, status
-from fastapi.exceptions import ResponseValidationError
-from pydantic import ValidationError
+from pydantic import ValidationError, EmailStr
 from database.conn_db import get_database_instance
 from database.models.user_model import UserCreateModel
 from utils.generate_id import obtener_ultimo_id
@@ -27,6 +26,7 @@ def user_exists_by_username(db, username: str) -> bool:
         print(f"Error al buscar usuario en la base de datos: {e}")
         return False
 
+# crear usuario
 def create_user(new_user_data: UserCreateModel):
     with get_database_instance() as db:
         try:
@@ -66,10 +66,10 @@ def create_user(new_user_data: UserCreateModel):
             # Insert the new user into the collection
             
             result = db.users_collection.insert_one(user_data)
-    
+            
             if result.inserted_id:
                 # Return the user data along with status code 201
-                return new_user_data.dict(), status.HTTP_201_CREATED
+                return {"message": "Usuario creado exitosamente"}, status.HTTP_201_CREATED
             else:
                 # Return status code 500 if insertion fails
                 return None, status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -85,3 +85,37 @@ def create_user(new_user_data: UserCreateModel):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error inesperado al crear el usuario. {ex}"
             )
+
+# obtener user por su username
+def get_user(username: str) -> dict:
+    try:
+        # Obtener la instancia de la base de datos
+        with get_database_instance() as db:
+            user = db.users_collection.find_one({"username": username})
+
+            if user:
+                user['id'] = user.pop('_id')
+                return user, status.HTTP_200_OK
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, '{username}' no existe.")
+    except Exception as e:
+        # No es necesario levantar una HTTPException aquí para errores internos
+        # FastAPI responderá automáticamente con un código de estado 500
+        raise e
+
+# obtener user por su email
+def get_user_by_email(email: EmailStr) -> dict:
+    try:
+        # Obtener la instancia de la base de datos
+        with get_database_instance() as db:
+            user = db.users_collection.find_one({"email": email})
+
+            if user:
+                user['id'] = user.pop('_id')
+                return user, status.HTTP_200_OK
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, email: '{email}' no existe.")
+    except Exception as e:
+        # No es necesario levantar una HTTPException aquí para errores internos
+        # FastAPI responderá automáticamente con un código de estado 500
+        raise e
