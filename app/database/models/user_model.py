@@ -7,7 +7,7 @@ class GoogleAuthModel(BaseModel):
 class UserBase(BaseModel):
     """Schema for creating a User."""
     full_name: constr(min_length=2, max_length=50) = Field(..., description="Nombre completo de usuario (entre 2 y 50 caracteres)")
-    username: constr(min_length=4, max_length=20) = Field(..., description="Identidicador de usuario (entre 4 y 20 caracteres)")
+    username: constr(min_length=2, max_length=20) = Field(..., description="Identidicador de usuario (entre 2 y 20 caracteres)")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
     password: constr(min_length=8)
     confirm_password: constr(min_length=8)
@@ -32,12 +32,11 @@ class UserBase(BaseModel):
         
 class UserUpdateModel(BaseModel):
     full_name: constr(min_length=2, max_length=50) = Field(..., description="Nombre completo de usuario (entre 2 y 50 caracteres)")
-    username: constr(min_length=4, max_length=20) = Field(..., description="Nombre de usuario (entre 4 y 20 caracteres)")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
-    password: constr(min_length=8) = None
-    confirm_password: constr(min_length=8) = None
-    roles: str = None
-    reset_password_token: str = None  #propiedad para el token de restablecimiento de contraseña
+    password: Optional[constr(min_length=8)] = None
+    confirm_password: Optional[constr(min_length=8)] = None
+    roles: Optional[str] = None
+    reset_password_token: Optional[str] = None  #propiedad para el token de restablecimiento de contraseña
     
     @validator('confirm_password', pre=True, always=True)
     def passwords_match(cls, v, values, **kwargs):

@@ -1,6 +1,22 @@
-from fastapi import APIRouter, HTTPException, status
-from database.operations.user_db import create_user, user_exists_by_email, user_exists_by_username, get_user, get_user_by_email
-from database.models.user_model import UserCreateModel, UserResponseModel
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    status,
+    Path
+)
+from database.operations.user_db import (
+    create_user,
+    user_exists_by_email,
+    user_exists_by_username,
+    get_user,
+    get_user_by_email,
+    update_user
+)
+from database.models.user_model import (
+    UserCreateModel,
+    UserResponseModel,
+    UserUpdateModel
+)
 from database.conn_db import get_database_instance
 from pydantic import EmailStr
 
@@ -38,7 +54,7 @@ def create_user_endpoint(new_user_data: UserCreateModel):
             
         try:
             created_user, http_status = create_user(new_user_data)
-            print(created_user, http_status)
+            
             if http_status == status.HTTP_201_CREATED:
                 return created_user
             else:
@@ -62,7 +78,7 @@ def create_user_endpoint(new_user_data: UserCreateModel):
     summary="Obtener usuario por su nombre",
     description="Este endpoint permite obtener la información detallada del usuario"
 )
-def get_user_endpoint(username: str):
+def get_user_endpoint(username: str = Path(min_length=2, max_length=20)):
     user, http_status = get_user(username)
     
     if http_status == status.HTTP_200_OK:
@@ -91,3 +107,34 @@ def get_userbyEmail_endpoint(email: EmailStr):
         status_code=http_status,
         detail=f"Error al consultar información de usuario. Status Code: {http_status}"
     )
+
+
+# actualizar usuario
+@router.put(
+    "/users/{username}",
+    tags=['users'],
+    summary="Actualizar información de usuario",
+    description="Este endpoint permite actualizar la información de un usuario existente en la base de datos. "
+                "Proporciona el username del usuario en la URL y la información actualizada en el cuerpo de la solicitud. "
+                "Si la actualización es exitosa, retorna la información actualizada del usuario."
+)
+def update_user_endpoint(username: str, updated_info: UserUpdateModel):
+    
+    with get_database_instance() as db:
+        try:
+            message, http_status = update_user(username, updated_info)
+
+            if http_status == status.HTTP_200_OK:
+                return message
+            else:
+                raise HTTPException(
+                    status_code=http_status,
+                    detail=f"Error al crear el usuario. Status Code: {http_status}"
+                )
+        except HTTPException as e:
+            return e
+        except Exception as ex:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error inesperado al actualizar el usuario: {str(ex)}"
+            )
