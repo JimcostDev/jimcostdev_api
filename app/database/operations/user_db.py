@@ -21,6 +21,7 @@ from pymongo.errors import PyMongoError
 import logging
 
 logger = logging.getLogger(__name__)
+
 # verificar si usuario existe
 def user_exists_by_email(db, user_email: str) -> bool:
     try:

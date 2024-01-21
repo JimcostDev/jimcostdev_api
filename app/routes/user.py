@@ -19,8 +19,9 @@ from database.models.user_model import (
 )
 from database.conn_db import get_database_instance
 from pydantic import EmailStr
+import logging
 
-
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # crear usuario
@@ -132,7 +133,8 @@ def update_user_endpoint(username: str, updated_info: UserUpdateModel):
                     detail=f"Error al crear el usuario. Status Code: {http_status}"
                 )
         except HTTPException as e:
-            return e
+            logger.error(f"HTTPException: {e.detail}")
+            raise e
         except Exception as ex:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
