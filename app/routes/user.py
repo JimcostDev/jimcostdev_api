@@ -10,7 +10,8 @@ from database.operations.user_db import (
     user_exists_by_username,
     get_user,
     get_user_by_email,
-    update_user
+    update_user,
+    delete_user
 )
 from database.models.user_model import (
     UserCreateModel,
@@ -140,3 +141,29 @@ def update_user_endpoint(username: str, updated_info: UserUpdateModel):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error inesperado al actualizar el usuario: {str(ex)}"
             )
+
+# eliminar usuario por su id
+@router.delete(
+    "/users/{id}",
+    tags=['users'],
+    status_code=status.HTTP_200_OK,
+    summary="Eliminar usuario",
+    description="Este endpoint permite eliminar un usuario existente en la base de datos proporcionando su ID.",
+)
+def delete_user_endpoint(id: int):
+    """
+    Elimina un usuario existente por su ID.
+
+    - **user_id**: El ID del usuario a eliminar.
+    """
+    with get_database_instance() as db:
+        try:
+            message, http_status = delete_user(id)
+            if http_status == status.HTTP_200_OK:
+                return message 
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No se encontró el usuario para eliminar")
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

@@ -72,7 +72,7 @@ class UserCreateModel(UserBase):
 class UserResponseModel(BaseModel):
     id: int = Field(..., description="Identificador único del contacto.")
     full_name: constr(min_length=2, max_length=50) = Field(..., description="Nombre completo de usuario (entre 2 y 50 caracteres)")
-    username: constr(min_length=4, max_length=20) = Field(..., description="Identidicador de usuario (entre 4 y 20 caracteres)")
+    username: constr(min_length=2, max_length=20) = Field(..., description="Identidicador de usuario (entre 2 y 20 caracteres)")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
     class Config:
         # Excluir campos específicos al crear la instancia de UserResponseModel

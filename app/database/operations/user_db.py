@@ -186,3 +186,19 @@ def update_user(username: str, updated_info: UserUpdateModel):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error inesperado al actualizar el usuario: {ex}"
             )
+
+# eliminar  usuario
+def delete_user(user_id: int) -> dict:
+    with get_database_instance() as db:
+        try:
+            result = db.users_collection.delete_one({"_id": user_id})
+            if result.deleted_count > 0:
+                message = {"message": "Usuario eliminado exitosamente"}
+                return message, status.HTTP_200_OK
+            else:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No se encontró el usuario para eliminar")
+        except PyMongoError as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error al eliminar usuario: {e}")  
+        except Exception as e:
+            raise e
+        
