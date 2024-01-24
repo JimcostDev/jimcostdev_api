@@ -19,17 +19,11 @@ router = APIRouter()
     summary="Crear datos de contacto",
     description="Crea nueva información de contacto con los datos proporcionados."
 )
-def create_contact_endpoint(new_contact_data: ContactModel = Depends(check_user_role)):
+def create_contact_endpoint(current_user: dict = Depends(check_user_role)):
         try:
-            created_contact, http_status = create_contact(new_contact_data)
-
-            if http_status == status.HTTP_201_CREATED:
+            created_contact = create_contact(new_contact_data=current_user, username=current_user["username"])
+            if created_contact:
                 return created_contact
-
-            raise HTTPException(
-                status_code=http_status,
-                detail=f"Error al crear el contacto. Status Code: {http_status}"
-            )
         except HTTPException as e:
             return e
         except Exception as ex:

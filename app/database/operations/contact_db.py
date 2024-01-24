@@ -5,16 +5,7 @@ from database.models.contact_model import ContactModel
 from utils.generate_id import obtener_ultimo_id
 
 # crear contacto
-def create_contact(new_contact_data: ContactModel):
-    """
-    Crea un nuevo contacto en la base de datos.
-
-    Args:
-        new_contact_data (ContactModel): Datos del nuevo contacto.
-
-    Returns:
-        tuple: Una tupla que contiene el contacto y el código de estado HTTP.
-    """
+def create_contact(new_contact_data: ContactModel, username: str):
     try:
         # Validar los datos del nuevo contacto utilizando el modelo
         contact_data = new_contact_data.dict()
@@ -22,6 +13,9 @@ def create_contact(new_contact_data: ContactModel):
         
         # Convertir la URL a una cadena (si es necesario)
         contact_data['web']['url'] = str(web_url_str)
+        
+        # Agregar el username al documento del contacto
+        contact_data['username'] = username
             
     except ValidationError as e:
         # Manejar errores de validación Pydantic aquí
@@ -45,10 +39,10 @@ def create_contact(new_contact_data: ContactModel):
             # Comprobar si la inserción fue exitosa
             if result.inserted_id:
                 # Devolver una instancia del modelo ContactModel y el código de estado 201
-                return ContactModel(**contact_data).dict(), status.HTTP_201_CREATED
+                return ContactModel(**contact_data).dict()
             else:
                 # Devolver el código de estado 500 si la inserción falla
-                return None, status.HTTP_500_INTERNAL_SERVER_ERROR
+                HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al insertar el contacto en la base de datos")
     except Exception as ex:
         # Devolver el código de estado 500 y los detalles de la excepción
         raise HTTPException(

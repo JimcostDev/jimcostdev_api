@@ -54,7 +54,7 @@ def login(user_data: LoginUser):
             # Payload del token JWT con información del usuario (puede incluir el ID, nombre, etc.)
             token_payload = {
                 'sub': user['username'],  
-                'rol': user['roles'],
+                'roles': user['roles'],
                 'exp': datetime.utcnow() + timedelta(minutes=30)  # Tiempo de expiración del token (30 minutos)
             }
             
