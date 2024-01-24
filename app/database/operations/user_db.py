@@ -127,7 +127,7 @@ def get_user_by_email(email: EmailStr) -> dict:
 
             if user:
                 user['id'] = user.pop('_id')
-                return user, status.HTTP_200_OK
+                return user
             else:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, email: '{email}' no existe.")
     except Exception as e:

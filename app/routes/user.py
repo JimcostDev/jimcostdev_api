@@ -100,15 +100,11 @@ def get_user_endpoint(username: str = Path(min_length=2, max_length=20)):
     description="Este endpoint permite obtener la información detallada del usuario"
 )
 def get_userbyEmail_endpoint(email: EmailStr):
-    user, http_status = get_user_by_email(email)
+    user = get_user_by_email(email)
     
-    if http_status == status.HTTP_200_OK:
-        return user
-
-    raise HTTPException(
-        status_code=http_status,
-        detail=f"Error al consultar información de usuario. Status Code: {http_status}"
-    )
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user
 
 
 # actualizar usuario
@@ -121,8 +117,6 @@ def get_userbyEmail_endpoint(email: EmailStr):
                 "Si la actualización es exitosa, retorna la información actualizada del usuario."
 )
 def update_user_endpoint(username: str, updated_info: UserUpdateModel):
-    
-    with get_database_instance() as db:
         try:
             message, http_status = update_user(username, updated_info)
 
@@ -151,12 +145,6 @@ def update_user_endpoint(username: str, updated_info: UserUpdateModel):
     description="Este endpoint permite eliminar un usuario existente en la base de datos proporcionando su ID.",
 )
 def delete_user_endpoint(id: int):
-    """
-    Elimina un usuario existente por su ID.
-
-    - **user_id**: El ID del usuario a eliminar.
-    """
-    with get_database_instance() as db:
         try:
             message, http_status = delete_user(id)
             if http_status == status.HTTP_200_OK:

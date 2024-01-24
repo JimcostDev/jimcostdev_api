@@ -22,7 +22,7 @@ app.add_middleware(
 # Agregar la ruta para servir archivos estáticos, incluido el favicon
 app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 
-@app.get("/", tags=['main', 'html'], response_class=HTMLResponse)
+@app.get("/", tags=['main'], response_class=HTMLResponse)
 def read_root():
     # Lee el contenido del archivo HTML y devuélvelo como respuesta HTML
     with open("templates/index.html", "r", encoding="utf-8") as html_file:

@@ -82,3 +82,16 @@ class UserInDB(UserResponseModel):
     """Schema for User stored in database."""
     created_at: str = Field(..., description="Fecha de creación del usuario")
     updated_at: str = Field(..., description="Fecha de última actualización del usuario")
+    
+    
+class LoginUser(BaseModel):
+    """Schema for user login."""
+    email: EmailStr
+    password: str
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "user@example.com",
+                "password": "securepassword",
+            }
+        }
