@@ -3,20 +3,24 @@ from pydantic import ValidationError
 from database.conn_db import get_database_instance
 from database.models.contact_model import ContactModel
 from utils.generate_id import obtener_ultimo_id
+import logging
+
+logger = logging.getLogger(__name__)
 
 # crear contacto
-def create_contact(new_contact_data: ContactModel, username: str):
+def create_contact(new_contact_data: ContactModel, username: str, email: str):
     try:
         # Validar los datos del nuevo contacto utilizando el modelo
-        contact_data = new_contact_data.dict()
+        contact_data = new_contact_data.dict(exclude_unset=True)
+       
         web_url_str = contact_data['web']['url']
         
         # Convertir la URL a una cadena (si es necesario)
         contact_data['web']['url'] = str(web_url_str)
         
-        # Agregar el username al documento del contacto
+        # Agregar el username y email al documento del contacto
         contact_data['username'] = username
-            
+        contact_data['email'] = email   
     except ValidationError as e:
         # Manejar errores de validación Pydantic aquí
         raise HTTPException(
@@ -42,26 +46,26 @@ def create_contact(new_contact_data: ContactModel, username: str):
                 return ContactModel(**contact_data).dict()
             else:
                 # Devolver el código de estado 500 si la inserción falla
-                HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al insertar el contacto en la base de datos")
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error al insertar el contacto en la base de datos")
     except Exception as ex:
-        # Devolver el código de estado 500 y los detalles de la excepción
+        logger.error(f'op= Error inesperado al crear el contacto: {str(ex)}')
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error inesperado al crear el contacto: {str(ex)}"
+            detail=f"op= Error inesperado al crear el contacto: {str(ex)}"
         )
 
-# obtenert info de contacti por id
-def get_contact_info_by_user(user_name: int) -> dict:
+# obtener info de contacto
+def get_contact_info_by_user(username: str) -> dict:
     try:
         # Obtener la instancia de la base de datos
         with get_database_instance() as db:
-            info_contact = db.contact_collection.find_one({"username": user_name})
+            info_contact = db.contact_collection.find_one({"username": username})
 
             if info_contact:
                 info_contact['id'] = info_contact.pop('_id')
                 return info_contact, status.HTTP_200_OK
             else:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{user_name}' no existe.")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe.")
     except Exception as e:
         # No es necesario levantar una HTTPException aquí para errores internos
         # FastAPI responderá automáticamente con un código de estado 500

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl
 
 class WebModel(BaseModel):
     url: HttpUrl = Field(..., description="La URL debe ser una URL válida.")
@@ -8,7 +8,6 @@ class ContactModel(BaseModel):
     nationality:  str = Field(..., description="Tu nacionalidad, longitud entre 1 y 50 caracteres.")
     phone_number: str = Field(..., description="Número de teléfono de contacto.")
     i_live_in: str = Field(..., description="Ubicación actual.")
-    email: EmailStr = Field(..., description="Dirección de correo electrónico válida.")
     web: WebModel = Field(..., description="Información relacionada con la web.")
     
     
@@ -18,7 +17,6 @@ class ContactModel(BaseModel):
                 "nationality": "país",
                 "phone_number": "(+34) 624 499234",
                 "i_live_in": "lugar donde vives",
-                "email": "correo@gmail.com",
                 "web": {
                     "url": "https://www.jimcostdev.com/",
                     "name": "jimcostdev.com"

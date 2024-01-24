@@ -51,7 +51,7 @@ def create_user(new_user_data: UserCreateModel):
             # Add fields
             user_data['created_at'] = str(datetime.utcnow())
             user_data['updated_at'] = str(datetime.utcnow())
-            user_data['roles'] = ['user']
+            user_data['roles'] = ['admin']
             
             # Remove 'confirm_password' before insertion and hashed 'password'
             user_data.pop('confirm_password', None)

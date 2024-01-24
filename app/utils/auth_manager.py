@@ -55,17 +55,17 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 # Función de dependencia para verificar el rol del usuario
 def check_user_role(current_user: dict = Depends(get_current_user)):
+    # Acceder al diccionario dentro de la tupla
+    user_dict = current_user[0]
+    
     # Verificar que el usuario tenga el rol necesario para consultar usuarios
     allowed_roles = ['super-admin', 'admin']
     
-    # Acceder al diccionario dentro de la tupla
-    user_dict = current_user[0]
-
     # Obtener el valor de la clave "roles" o un valor predeterminado si la clave no está presente
     user_roles = user_dict.get("roles", [])
     
     # Verificar si al menos uno de los roles en user_roles está en allowed_roles
     if not any(role in allowed_roles for role in user_roles):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permiso denegado. Se requiere rol de 'super-admin' o 'admin'")
-    
-    return current_user
+
+    return user_dict
