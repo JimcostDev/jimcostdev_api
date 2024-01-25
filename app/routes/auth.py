@@ -4,18 +4,16 @@ from fastapi import (
     status,
     Depends
 )
-from fastapi.security import OAuth2PasswordBearer
+
 from database.models.user_model import LoginUser
 from database.operations.user_db import get_user_by_email
-from jose import jwt
-from database.conn_db import get_database_instance
 from utils.hash_and_verify_password import verify_password
 from utils.auth_manager import (
-    get_current_user, 
-    create_token, 
+    get_current_user,
+    create_token,
     oauth2_scheme,
     token_blacklist
-    )
+)
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from typing import Optional
@@ -31,7 +29,7 @@ load_dotenv("config.env")
 secret_key = os.getenv("JWT_SECRET_KEY")
 
 
-# Iniciar sesión (login)     
+# Iniciar sesión (login)
 @router.post(
     "/login",
     tags=['auth'],
@@ -41,30 +39,30 @@ secret_key = os.getenv("JWT_SECRET_KEY")
 )
 def login(user_data: LoginUser):
     try:
-        with get_database_instance() as db:
-            user = get_user_by_email(user_data.email)
-            
-            if not user:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
-            
-            # Verificar contraseña
-            if not verify_password(user_data.password, user['password']):
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Contraseña incorrecta")
-            
-            # Payload del token JWT con información del usuario (puede incluir el ID, nombre, etc.)
-            token_payload = {
-                'sub': user['username'],  
-                'roles': user['roles'],
-                'exp': datetime.utcnow() + timedelta(minutes=30)  # Tiempo de expiración del token (30 minutos)
-            }
-            
-            message = create_token(token_payload, secret_key)
-            return message
+        user = get_user_by_email(user_data.email)
+
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, email: '{user_data.email}' no existe.")
+                
+        # Verificar contraseña
+        if not verify_password(user_data.password, user['password']):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Contraseña incorrecta")
+
+        # Payload del token JWT con información del usuario (puede incluir el ID, nombre, etc.)
+        token_payload = {
+            'sub': user['username'],
+            'roles': user['roles'],
+            # Tiempo de expiración del token (30 minutos)
+            'exp': datetime.utcnow() + timedelta(minutes=30)
+        }
+
+        message = create_token(token_payload, secret_key)
+        return message
     except Exception as e:
-        # Loggear la excepción
         logger.error(f"Ocurrió un error durante el login: {e}")
-        # Levantar una excepción HTTP con un mensaje amigable
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error interno del servidor")    
+        raise e
 
 # Cerrar sesión (logout)
 @router.post(
@@ -78,10 +76,11 @@ def logout(current_user: dict = Depends(get_current_user), token: Optional[str] 
         # Agregar el token actual a la lista negra
         if token:
             token_blacklist.add(token)
-        
+
         return {"message": "Logout exitoso"}
     except Exception as e:
         # Loggear la excepción
         logger.error(f"Ocurrió un error durante el logout: {e}")
         # Levantar una excepción HTTP con un mensaje amigable
-        raise HTTPException(status_code=500, detail="Error interno del servidor")
+        raise HTTPException(
+            status_code=500, detail="Error interno del servidor")

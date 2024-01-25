@@ -31,7 +31,6 @@ def create_token(token_payload: dict, secret_key: str):
         # Otra excepción
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error al generar el token: {e}")
     
-
 # Función para obtener el token JWT y verificarlo
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
@@ -51,7 +50,6 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError as e:
         print(f"Error decodificando el token: {e}")
         raise HTTPException(status_code=401, detail=f"No se pudo validar las credenciales: {e}")
-
 
 # Función de dependencia para verificar el rol del usuario
 def check_user_role(current_user: dict = Depends(get_current_user)):

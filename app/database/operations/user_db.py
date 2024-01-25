@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import (
     HTTPException, 
     status
@@ -119,7 +120,7 @@ def get_user(username: str) -> dict:
         raise e
 
 # obtener user por su email
-def get_user_by_email(email: EmailStr) -> dict:
+def get_user_by_email(email: EmailStr) -> Optional[dict]:
     try:
         # Obtener la instancia de la base de datos
         with get_database_instance() as db:
@@ -129,7 +130,8 @@ def get_user_by_email(email: EmailStr) -> dict:
                 user['id'] = user.pop('_id')
                 return user
             else:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, email: '{email}' no existe.")
+                #raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, email: '{email}' no existe.")
+                return None
     except Exception as e:
         # No es necesario levantar una HTTPException aquí para errores internos
         # FastAPI responderá automáticamente con un código de estado 500
@@ -140,10 +142,11 @@ def update_user(username: str, updated_info: UserUpdateModel):
     with get_database_instance() as db:
         try: 
             existing_user = db.users_collection.find_one({"username": username})
+
             if existing_user is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="El usuario no existe.")
                 #return {"message": "El usuario no existe."}, status.HTTP_404_NOT_FOUND
-            
+           
             # Verificar si el email actualizado ya existe en otro usuario
             if updated_info.email != existing_user['email']:
                 if user_exists_by_email(db, updated_info.email):
@@ -187,18 +190,18 @@ def update_user(username: str, updated_info: UserUpdateModel):
                 detail=f"Error inesperado al actualizar el usuario: {ex}"
             )
 
-# eliminar  usuario
-def delete_user(user_id: int) -> dict:
+# Eliminar usuario
+def delete_user(username: str) -> dict:
     with get_database_instance() as db:
         try:
-            result = db.users_collection.delete_one({"_id": user_id})
+            result = db.users_collection.delete_one({"username": username})
             if result.deleted_count > 0:
                 message = {"message": "Usuario eliminado exitosamente"}
                 return message, status.HTTP_200_OK
             else:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No se encontró el usuario para eliminar")
         except PyMongoError as e:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error al eliminar usuario: {e}")  
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error al eliminar usuario: {e}")
         except Exception as e:
-            raise e
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
         

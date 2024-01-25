@@ -2,8 +2,10 @@ from fastapi import (
     APIRouter,
     HTTPException,
     status,
-    Path
+    Path,
+    Depends
 )
+from utils.auth_manager import check_user_role
 from database.operations.user_db import (
     create_user,
     user_exists_by_email,
@@ -102,8 +104,9 @@ def get_user_endpoint(username: str = Path(min_length=2, max_length=20)):
 def get_userbyEmail_endpoint(email: EmailStr):
     user = get_user_by_email(email)
     
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if  user is None:
+        raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, email: '{email}' no existe.")
     return user
 
 
@@ -116,8 +119,14 @@ def get_userbyEmail_endpoint(email: EmailStr):
                 "Proporciona el username del usuario en la URL y la información actualizada en el cuerpo de la solicitud. "
                 "Si la actualización es exitosa, retorna la información actualizada del usuario."
 )
-def update_user_endpoint(username: str, updated_info: UserUpdateModel):
+def update_user_endpoint(username: str, updated_info: UserUpdateModel, current_user: dict = Depends(check_user_role)):
         try:
+            # Verificar que el usuario actual esté actualizando su propia información
+            if current_user["username"] != username:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="No tienes permiso para actualizar la información de otro usuario."
+                )
             message, http_status = update_user(username, updated_info)
 
             if http_status == status.HTTP_200_OK:
@@ -138,15 +147,21 @@ def update_user_endpoint(username: str, updated_info: UserUpdateModel):
 
 # eliminar usuario por su id
 @router.delete(
-    "/users/{id}",
+    "/users/{username}",
     tags=['users'],
     status_code=status.HTTP_200_OK,
     summary="Eliminar usuario",
-    description="Este endpoint permite eliminar un usuario existente en la base de datos proporcionando su ID.",
+    description="Este endpoint permite eliminar un usuario existente en la base de datos.",
 )
-def delete_user_endpoint(id: int):
+def delete_user_endpoint(username: str, current_user: dict = Depends(check_user_role)):
         try:
-            message, http_status = delete_user(id)
+            # Verificar que el usuario actual esté eliminando su propia información
+            if current_user["username"] != username:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="No tienes permiso para eliminar la información de otro usuario."
+                )
+            message, http_status = delete_user(username)
             if http_status == status.HTTP_200_OK:
                 return message 
             else:
