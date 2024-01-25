@@ -83,15 +83,12 @@ def create_user_endpoint(new_user_data: UserCreateModel):
     description="Este endpoint permite obtener la información detallada del usuario"
 )
 def get_user_endpoint(username: str = Path(min_length=2, max_length=20)):
-    user, http_status = get_user(username)
+    user = get_user(username)
     
-    if http_status == status.HTTP_200_OK:
-        return user
-
-    raise HTTPException(
-        status_code=http_status,
-        detail=f"Error al consultar información de usuario. Status Code: {http_status}"
-    )
+    if  user is None:
+        raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, '{username}' no existe.")
+    return user
     
 # consultar usuario por email
 @router.get(

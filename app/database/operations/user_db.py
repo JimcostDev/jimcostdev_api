@@ -111,12 +111,11 @@ def get_user(username: str) -> dict:
 
             if user:
                 user['id'] = user.pop('_id')
-                return user, status.HTTP_200_OK
+                return user
             else:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, '{username}' no existe.")
+                #raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, '{username}' no existe.")
+                return None
     except Exception as e:
-        # No es necesario levantar una HTTPException aquí para errores internos
-        # FastAPI responderá automáticamente con un código de estado 500
         raise e
 
 # obtener user por su email
@@ -133,8 +132,6 @@ def get_user_by_email(email: EmailStr) -> Optional[dict]:
                 #raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, email: '{email}' no existe.")
                 return None
     except Exception as e:
-        # No es necesario levantar una HTTPException aquí para errores internos
-        # FastAPI responderá automáticamente con un código de estado 500
         raise e
     
 # actualizar usuario

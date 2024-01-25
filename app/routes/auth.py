@@ -11,10 +11,10 @@ from utils.hash_and_verify_password import verify_password
 from utils.auth_manager import (
     get_current_user,
     create_token,
-    oauth2_scheme,
-    token_blacklist
+    oauth2_scheme
 )
 from datetime import datetime, timedelta
+from jose import jwt
 from dotenv import load_dotenv
 from typing import Optional
 import logging
@@ -73,11 +73,24 @@ def login(user_data: LoginUser):
 )
 def logout(current_user: dict = Depends(get_current_user), token: Optional[str] = Depends(oauth2_scheme)):
     try:
-        # Agregar el token actual a la lista negra
+        # Invalidar el token actual estableciendo su tiempo de expiración en el pasado
         if token:
-            token_blacklist.add(token)
-
-        return {"message": "Logout exitoso"}
+            # Puedes ajustar el tiempo de expiración según tus necesidades
+            past_expiration_time = datetime.utcnow() - timedelta(minutes=1)
+            past_exp = int(past_expiration_time.timestamp())
+            
+            # Crear un nuevo token con tiempo de expiración en el pasado
+            invalid_token_payload = {
+                'sub': current_user['username'],
+                'roles': current_user['roles'],
+                'exp': past_exp
+            }
+            
+            invalid_token = jwt.encode(invalid_token_payload, secret_key, algorithm='HS256')
+            
+            return {"message": "Logout exitoso", "invalid_token": invalid_token}
+        else:
+            return {"message": "Logout exitoso"}
     except Exception as e:
         # Loggear la excepción
         logger.error(f"Ocurrió un error durante el logout: {e}")
