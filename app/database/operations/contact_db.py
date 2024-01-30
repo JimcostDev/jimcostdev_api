@@ -69,7 +69,6 @@ def get_contact_info_by_user(username: str) -> dict:
     except Exception as e:
         raise e
 
-
 # actualizar contacto
 def update_contact(username: str, updated_info: ContactModel):
     with get_database_instance() as db:
