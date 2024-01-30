@@ -67,6 +67,36 @@ def get_contact_info_by_user(username: str) -> dict:
             else:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe.")
     except Exception as e:
-        # No es necesario levantar una HTTPException aquí para errores internos
-        # FastAPI responderá automáticamente con un código de estado 500
         raise e
+
+
+# actualizar contacto
+def update_contact(username: str, updated_info: ContactModel):
+    with get_database_instance() as db:
+        try:
+            existing_info = db.contact_collection.find_one({"username": username})
+            if existing_info is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe.")
+
+            # Convertir ContactModel a un diccionario
+            updated_values = updated_info.model_dump(exclude_unset=True)
+
+            # Convertir la URL a una cadena (si es necesario)
+            web_url_str = updated_values['web']['url']
+            updated_values['web']['url'] = str(web_url_str)
+
+            # Actualizar y obtener el resultado
+            result = db.contact_collection.update_one(
+                {"username": username},
+                {"$set": updated_values}
+            )
+
+            if result.matched_count > 0 and result.modified_count > 0:
+                message = {"message": "Usuario actualizado exitosamente"}
+                return message
+            else:
+                message = {"message": "No se realizó ninguna actualización"}
+                return message
+        except Exception as e:
+            logger.exception(f"Error al actualizar el usuario: {e}")
+            raise e

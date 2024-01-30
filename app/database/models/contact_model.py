@@ -42,3 +42,4 @@ class ContactResponseModel(ContactModel):
                 "username": "username"
             }
         }
+
