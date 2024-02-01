@@ -65,7 +65,7 @@ def get_contact_info_by_user(username: str) -> dict:
                 info_contact['id'] = info_contact.pop('_id')
                 return info_contact, status.HTTP_200_OK
             else:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe.")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe o no tiene información de contacto asociada.")
     except Exception as e:
         raise e
 
@@ -91,11 +91,27 @@ def update_contact(username: str, updated_info: ContactModel):
             )
 
             if result.matched_count > 0 and result.modified_count > 0:
-                message = {"message": "Usuario actualizado exitosamente"}
+                message = {"message": "Información de contacto actualizada exitosamente"}
                 return message
             else:
                 message = {"message": "No se realizó ninguna actualización"}
                 return message
         except Exception as e:
-            logger.exception(f"Error al actualizar el usuario: {e}")
+            logger.exception(f"Error al actualizar la información de contacto: {e}")
             raise e
+
+# eliminar contacto
+def delete_user(username: str):
+    try:
+        with get_database_instance() as db:
+            result = db.contact_collection.delete_one({"username": username})
+
+            if result.deleted_count > 0:
+                message = {"message": "Información de contacto eliminada exitosamente"}
+                return message
+            else:
+                #raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe.")
+                return None
+    except Exception as e:
+        logger.exception(f"Error al eliminar info contacto: {e}")
+        raise e

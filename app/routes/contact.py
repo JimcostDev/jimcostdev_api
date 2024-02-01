@@ -7,7 +7,8 @@ from utils.auth_manager import check_user_role
 from database.operations.contact_db import (
     create_contact, 
     get_contact_info_by_user,
-    update_contact
+    update_contact,
+    delete_user
 )
 from database.models.contact_model import ContactModel, ContactResponseModel
 import logging
@@ -83,4 +84,32 @@ def update_contact_endpoint(username: str, updated_info: ContactModel, current_u
         
         except Exception as ex:
             logger.error(f'rou= Error inesperado al actualizar el contacto: {str(ex)}')
+            raise ex
+
+# eliminar info de contacto
+@router.delete(
+    "/contact/{username}",
+    tags=['contact'],
+    status_code=status.HTTP_200_OK,
+    summary="Eliminar datos de contacto",
+    description="Elimina la información de contacto del usuario."
+)
+def delete_contact_endpoint(username: str, current_user: dict = Depends(check_user_role)):
+        try:
+            # Verificar que el usuario actual esté eliminando su propia información
+            if current_user["username"] != username:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="No tienes permiso para eliminar la información de otro usuario."
+                )
+            message = delete_user(username)
+            if message:
+                return message
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe."
+                )
+        except Exception as ex:
+            logger.error(f'rou= Error inesperado al eliminar el contacto: {str(ex)}')
             raise ex
