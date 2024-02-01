@@ -13,11 +13,6 @@ def create_contact(new_contact_data: ContactModel, username: str, email: str):
         # Validar los datos del nuevo contacto utilizando el modelo
         contact_data = new_contact_data.dict(exclude_unset=True)
        
-        web_url_str = contact_data['web']['url']
-        
-        # Convertir la URL a una cadena (si es necesario)
-        contact_data['web']['url'] = str(web_url_str)
-        
         # Agregar el username y email al documento del contacto
         contact_data['username'] = username
         contact_data['email'] = email   
@@ -79,10 +74,6 @@ def update_contact(username: str, updated_info: ContactModel):
 
             # Convertir ContactModel a un diccionario
             updated_values = updated_info.model_dump(exclude_unset=True)
-
-            # Convertir la URL a una cadena (si es necesario)
-            web_url_str = updated_values['web']['url']
-            updated_values['web']['url'] = str(web_url_str)
 
             # Actualizar y obtener el resultado
             result = db.contact_collection.update_one(
