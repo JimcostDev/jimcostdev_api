@@ -1,14 +1,12 @@
 # JimcostDev API
 
-Este proyecto se encuentra en desarrollo y tiene como objetivo la creación de una API para la gestión de portafolios y currículums (CV). Surge de la necesidad de contar con una página web personal para exhibir mis habilidades y también convertir esa información en un formato de CV. Busco encontrar una solución que pueda ser útil para otras personas.
+Este proyecto se encuentra en desarrollo y tiene como objetivo la creación de una API para la gestión de portafolios y currículums (CV). Surge de la necesidad de contar con una página web personal para exhibir mis habilidades y convertir esa información en un formato de CV. Busco encontrar una solución que también pueda ser útil para otras personas.
 
 ## Tecnologías Utilizadas
 
-[![Python](https://img.shields.io/badge/Python-1f425f?style=for-the-badge&logo=python&logoColor=white&labelColor=101010)]()
-
-[![FastAPI](https://img.shields.io/badge/FastAPI-00599C?style=for-the-badge&logo=fastapi&logoColor=white&labelColor=101010)](https://fastapi.tiangolo.com/)
-
-[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white&labelColor=101010)]()
+[![Python](https://img.shields.io/badge/Python-f6d44e?style=for-the-badge&logo=python&logoColor=white&labelColor=101010)]()
+[![FastAPI](https://img.shields.io/badge/FastAPI-059487?style=for-the-badge&logo=fastapi&logoColor=white&labelColor=101010)](https://fastapi.tiangolo.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-00Ed64?style=for-the-badge&logo=mongodb&logoColor=white&labelColor=101010)]()
 
 ## Instalación
 
