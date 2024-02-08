@@ -14,8 +14,6 @@ from database.models.contact_model import ContactModel, ContactResponseModel
 import logging
 from fastapi import status, HTTPException
 import logging
-from fastapi import status, HTTPException
-from fastapi import status, HTTPException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
