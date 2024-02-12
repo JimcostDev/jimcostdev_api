@@ -32,7 +32,7 @@ def create_certification_endpoint(certification_data: CertificationModel, curren
         if created_certification:
             return created_certification
     except Exception as ex:
-            logger.error(f'rou= Error inesperado al crear certificación: {str(ex)}')
+            logger.error(f'ro= Error inesperado al crear certificación: {str(ex)}')
             raise ex   
 
 # obtener certificaciones por usuario
