@@ -92,7 +92,7 @@ def update_contact(username: str, updated_info: ContactModel):
             raise e
 
 # eliminar contacto
-def delete_user(username: str):
+def delete_contact(username: str):
     try:
         with get_database_instance() as db:
             result = db.contact_collection.delete_one({"username": username})

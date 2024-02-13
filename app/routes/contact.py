@@ -8,7 +8,7 @@ from database.operations.contact_db import (
     create_contact, 
     get_contact_info_by_user,
     update_contact,
-    delete_user
+    delete_contact 
 )
 from database.models.contact_model import ContactModel, ContactResponseModel
 import logging
@@ -100,7 +100,7 @@ def delete_contact_endpoint(username: str, current_user: dict = Depends(check_us
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="No tienes permiso para eliminar la información de otro usuario."
                 )
-            message = delete_user(username)
+            message = delete_contact(username)
             if message:
                 return message
             else:

@@ -72,4 +72,49 @@ def get_certifications_by_user(username: str) -> List[CertificationResponseModel
     except Exception as e:
         logger.exception(f"Ha ocurrido una excepción al obtener las certificaciones del usuario: {e}")
         raise e
-    
+
+# actualizar certificación
+def update_certification(username: str, updated_info: CertificationModel):
+    try:
+        with get_database_instance() as db:
+            existing = db.certifications_collection.find_one({"username": username})
+            if existing is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar certificación, el usuario '{username}' no existe o no tiene certificaciones")
+            
+            # convertir el modelo a un diccionario
+            updated_values = updated_info.model_dump(exclude_unset=True)
+            
+            # Convertir la URL a una cadena (si es necesario)
+            url_str = updated_values['link']
+            updated_values['link'] = str(url_str)
+            
+            # actualizar y devolver el resultado
+            result = db.certifications_collection.update_one(
+                {"username": username},
+                {"$set": updated_values}
+            )
+            
+            if result.matched_count  > 0 and result.modified_count > 0:
+                message = {"message": "Certificación actualizada exitosamente"}
+                return message
+            else:
+                message = {"message": "No se pudo actualizar la certificación o no se encontraron cambios."}
+                return message
+    except Exception as e:
+            logger.exception(f"Error al actualizar la información de contacto: {e}")
+            raise e
+
+# eliminar certificación
+def delete_certification(username: str):
+    try:
+        with get_database_instance() as db:
+            result = db.certifications_collection.delete_one({"username": username})
+            
+            if result.deleted_count > 0:
+                message = {"message": "Certificación eliminada exitosamente"}
+                return message
+            else:
+                return None
+    except Exception as e:
+        logger.exception(f"Error al eliminar certificación: {e}")
+        raise e
