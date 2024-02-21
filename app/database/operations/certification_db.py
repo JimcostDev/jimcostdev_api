@@ -59,7 +59,7 @@ def get_certifications_by_user(username: str) -> List[CertificationResponseModel
         # Obtener la instancia de la base de datos
         with get_database_instance() as db:
             # Obtener las certificaciones del usuario
-            certifications_cursor = db.certifications_collection.find({"username": username})
+            certifications_cursor = db.certifications_collection.find({"username": username}).sort("company", -1)
             
             if certifications_cursor:
                 certifications_list = [
