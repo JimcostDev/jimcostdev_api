@@ -6,7 +6,8 @@ from fastapi import (
 )
 from utils.auth_manager import check_user_role
 from database.operations.education_db import (
-    get_education_by_user
+    get_education_by_user,
+    create_education
 )
 from database.models.education_model import EducationResponseModel, EducationModel
 import logging
@@ -37,4 +38,22 @@ def get_education_endpoint(username: str):
     except Exception as ex:
         logger.error(
             f'rou= Error inesperado al obtener educación: {str(ex)}')
+        raise ex
+    
+# crear educación
+@router.post(
+    "/education",
+    tags=['education'],
+    status_code=status.HTTP_201_CREATED,
+    summary="Crear educación",
+    description="Crea nueva educación con los datos proporcionados."
+)
+def create_education_endpoint(education_data: EducationModel, current_user: dict = Depends(check_user_role)):
+    try:
+        created_education = create_education(
+            education_data, username=current_user["username"])
+        if created_education:
+            return created_education
+    except Exception as ex:
+        logger.error(f'ro= Error inesperado al crear educación: {str(ex)}')
         raise ex
