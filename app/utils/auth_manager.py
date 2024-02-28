@@ -19,6 +19,7 @@ def create_token(token_payload: dict, secret_key: str):
         token = jwt.encode(token_payload, secret_key, algorithm='HS256')   
         # Devolver el token en la respuesta
         return {"message": "Inicio de sesión exitoso", "access_token": token, "token_type": "bearer"}  
+    
     except Exception as e:
         # Otra excepción
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error al generar el token: {e}")
@@ -37,12 +38,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except jwt.ExpiredSignatureError:
         # Token expirado
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expirado")
-    except jwt.InvalidSignatureError:
-        # Token inválido (firma no válida)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="La firma no es válida")
-    except jwt.DecodeError:
-        # Token inválido (no se pudo decodificar)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="El token no es válido")
+    
     except JWTError as e:
         print(f"Error decodificando el token: {e}")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"No se pudo validar las credenciales: {e}")
