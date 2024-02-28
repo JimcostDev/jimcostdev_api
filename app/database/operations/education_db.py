@@ -46,7 +46,7 @@ def create_education(education_data: EducationModel, username: str):
     try:
         # Obtener la instancia de la base de datos
         with get_database_instance() as db:
-            # Obtener el último id de la colección de certificaciones
+            # Obtener el último id de la colección de educación
             ultimo_id = obtener_ultimo_id(db.education_collection)
             
             # asignar el id al nuevo documento
@@ -67,3 +67,47 @@ def create_education(education_data: EducationModel, username: str):
     except Exception as e:
             logger.exception(f"Ha ocurrido una excepción al crear educación: {e}")
             raise e
+
+# actualizar educación
+def update_education(updated_info: EducationModel, id_education: int, username: str):
+    try:
+        with get_database_instance() as db:
+            existing = db.education_collection.find_one({"username": username})
+            if existing is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar educación, el usuario '{username}' no existe o no tiene estudios creados")
+            
+            # convertir el modelo a un diccionario
+            updated_values = updated_info.model_dump(exclude_unset=True)
+            # ageregar el usuario que crea la educación
+            updated_values["username"] = username
+            
+            # actualizar y devolver el resultado
+            result = db.education_collection.update_one(
+                {"username": 'username', "_id": id_education},
+                {"$set": updated_values}
+            )
+            print(f'resultado:{result.matched_count}')
+            if result.matched_count  > 0 and result.modified_count > 0:
+                message = {"message": "Educación actualizada exitosamente"}
+                return message
+            else:
+                message = {"message": "No se pudo actualizar la educación o no se encontraron cambios."}
+                return message
+    except Exception as e:
+            logger.exception(f"Error al actualizar la información de educación: {e}")
+            raise e
+
+# eliminar educación
+def delete_education(id: int , username: str, ):
+    try:
+        with get_database_instance() as db:
+            result = db.education_collection.delete_one({"username": username, "_id": id})
+            
+            if result.deleted_count > 0:
+                message = {"message": "Educación eliminada exitosamente"}
+                return message
+            else:
+                return None
+    except Exception as e:
+        logger.exception(f"Error al eliminar educación: {e}")
+        raise e

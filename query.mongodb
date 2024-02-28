@@ -1,5 +1,5 @@
 use("jimcostdev_api")
-db.users.getIndexes()
-//db.users.dropIndex("user_email_text")
+db.education.find({username: 'rjak', _id: 5})
 
-
+use("jimcostdev_api")
+db.education.deleteOne({username: 'rjak', _id: 5})
