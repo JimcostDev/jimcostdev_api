@@ -72,9 +72,9 @@ def create_education(education_data: EducationModel, username: str):
 def update_education(updated_info: EducationModel, id_education: int, username: str):
     try:
         with get_database_instance() as db:
-            existing = db.education_collection.find_one({"username": username})
+            existing = db.education_collection.find_one({"username": username, "_id": id_education})
             if existing is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar educación, el usuario '{username}' no existe o no tiene estudios creados")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar educación, el usuario '{username}' no existe o no tiene estudios asociados al id proporcionado.")
             
             # convertir el modelo a un diccionario
             updated_values = updated_info.model_dump(exclude_unset=True)
@@ -83,7 +83,7 @@ def update_education(updated_info: EducationModel, id_education: int, username: 
             
             # actualizar y devolver el resultado
             result = db.education_collection.update_one(
-                {"username": 'username', "_id": id_education},
+                {"username": username, "_id": id_education},
                 {"$set": updated_values}
             )
             print(f'resultado:{result.matched_count}')

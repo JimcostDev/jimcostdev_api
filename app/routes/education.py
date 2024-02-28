@@ -35,7 +35,7 @@ def get_education_endpoint(username: str):
 
         if education == []:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar educación para el usuario, '{username}'")
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar información de educación para el usuario, '{username}'")
         return education
     except Exception as ex:
         logger.error(
@@ -108,7 +108,7 @@ def delete_education_endpoint(id: int, current_user: dict = Depends(check_user_r
         else:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No se pudo encontrar la educación, el usuario '{username}' no existe o no tiene información de estudios"
+                detail=f"No se pudo encontrar la educación, el usuario '{username}' no existe o no tiene información de estudios asociada al id proporcionado."
             )
     except Exception as ex:
         logger.error(
