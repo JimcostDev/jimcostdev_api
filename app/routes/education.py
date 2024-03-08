@@ -71,12 +71,6 @@ def create_education_endpoint(education_data: EducationModel, current_user: dict
 )
 def update_education_endpoint(updated_info: EducationModel, id_education: int, current_user: dict = Depends(check_user_role)):
     try:
-        # Verificar que el usuario actual esté actualizando su propia información
-        if current_user["username"] != current_user["username"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="No tienes permiso para actualizar la información de otro usuario."
-            )
         message = update_education(updated_info, id_education, username=current_user["username"])
         return message
     except Exception as ex:
@@ -95,12 +89,6 @@ def update_education_endpoint(updated_info: EducationModel, id_education: int, c
 )
 def delete_education_endpoint(id: int, current_user: dict = Depends(check_user_role)):
     try:
-        # Verificar que el usuario actual esté eliminando su propia información
-        if current_user["username"] != current_user["username"]:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="No tienes permiso para eliminar la información de otro usuario."
-            )
         username = current_user["username"]
         message = delete_education(id, username)
         if message:

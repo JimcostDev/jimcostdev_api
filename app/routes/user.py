@@ -109,22 +109,17 @@ def get_userbyEmail_endpoint(email: EmailStr):
 
 # actualizar usuario
 @router.put(
-    "/users/{username}",
+    "/users/",
     tags=['users'],
     summary="Actualizar información de usuario",
     description="Este endpoint permite actualizar la información de un usuario existente en la base de datos. "
                 "Proporciona el username del usuario en la URL y la información actualizada en el cuerpo de la solicitud. "
                 "Si la actualización es exitosa, retorna la información actualizada del usuario."
 )
-def update_user_endpoint(username: str, updated_info: UserUpdateModel, current_user: dict = Depends(check_user_role)):
+def update_user_endpoint(updated_info: UserUpdateModel, current_user: dict = Depends(check_user_role)):
         try:
-            # Verificar que el usuario actual esté actualizando su propia información
-            if current_user["username"] != username:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No tienes permiso para actualizar la información de otro usuario."
-                )
-            message, http_status = update_user(username, updated_info)
+            username = current_user["username"]
+            message, http_status = update_user(updated_info, username)
 
             if http_status == status.HTTP_200_OK:
                 return message
@@ -144,20 +139,15 @@ def update_user_endpoint(username: str, updated_info: UserUpdateModel, current_u
 
 # eliminar usuario por su id
 @router.delete(
-    "/users/{username}",
+    "/users/",
     tags=['users'],
     status_code=status.HTTP_200_OK,
     summary="Eliminar usuario",
     description="Este endpoint permite eliminar un usuario existente en la base de datos.",
 )
-def delete_user_endpoint(username: str, current_user: dict = Depends(check_user_role)):
+def delete_user_endpoint(current_user: dict = Depends(check_user_role)):
         try:
-            # Verificar que el usuario actual esté eliminando su propia información
-            if current_user["username"] != username:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No tienes permiso para eliminar la información de otro usuario."
-                )
+            username = current_user["username"]
             message, http_status = delete_user(username)
             if http_status == status.HTTP_200_OK:
                 return message 

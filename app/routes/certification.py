@@ -62,21 +62,16 @@ def get_certifications_endpoint(username: str):
 
 # actualizar certificación
 @router.put(
-    "/certification/{username}",
+    "/certification/{id}",
     tags=['certifications'],
     summary="Actualizar certificación",
     description="Actualiza los datos de una certificación",
     status_code=status.HTTP_200_OK
 )
-def update_certification_endpoint(username: str, updated_info: CertificationModel, current_user: dict = Depends(check_user_role)):
+def update_certification_endpoint(updated_info: CertificationModel, id: int, current_user: dict = Depends(check_user_role)):
     try:
-        # Verificar que el usuario actual esté actualizando su propia información
-        if current_user["username"] != username:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="No tienes permiso para actualizar la información de otro usuario."
-            )
-        message = update_certification(username, updated_info)
+        username = current_user["username"]
+        message = update_certification(updated_info, id, username)
         return message
     except Exception as ex:
         logger.error(
@@ -86,27 +81,22 @@ def update_certification_endpoint(username: str, updated_info: CertificationMode
 
 # eliminar certificación
 @router.delete(
-    "/certification/{username}",
+    "/certification/{id}",
     tags=['certifications'],
     summary="Eliminar certificación",
     description="Elimina la certificación del usuario",
     status_code=status.HTTP_200_OK
 )
-def delete_certification_endpoint(username: str, current_user: dict = Depends(check_user_role)):
+def delete_certification_endpoint(id: int, current_user: dict = Depends(check_user_role)):
     try:
-        # Verificar que el usuario actual esté eliminando su propia información
-        if current_user["username"] != username:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="No tienes permiso para eliminar la información de otro usuario."
-            )
-        message = delete_certification(username)
+        username = current_user["username"]
+        message = delete_certification(id, username)
         if message:
             return message
         else:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No se pudo encontrar la certificación, el usuario '{username}' no existe o no tiene certificaciones"
+                detail=f"No se pudo encontrar la certificación, el usuario '{username}' no existe o no tiene información asociada al id proporcionado."
             )
     except Exception as ex:
         logger.error(

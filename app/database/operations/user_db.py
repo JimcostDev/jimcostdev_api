@@ -135,7 +135,7 @@ def get_user_by_email(email: EmailStr) -> Optional[dict]:
         raise e
     
 # actualizar usuario
-def update_user(username: str, updated_info: UserUpdateModel):
+def update_user(updated_info: UserUpdateModel, username: str):
     with get_database_instance() as db:
         try: 
             existing_user = db.users_collection.find_one({"username": username})

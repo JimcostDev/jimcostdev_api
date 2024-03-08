@@ -65,19 +65,19 @@ def get_contact_info_by_user(username: str) -> dict:
         raise e
 
 # actualizar contacto
-def update_contact(username: str, updated_info: ContactModel):
+def update_contact(updated_info: ContactModel, id: int, username: str):
     with get_database_instance() as db:
         try:
-            existing_info = db.contact_collection.find_one({"username": username})
+            existing_info = db.contact_collection.find_one({"username": username, "_id": id})
             if existing_info is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe.")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe o no tiene información asociada al id proporcionado.")
 
             # Convertir ContactModel a un diccionario
             updated_values = updated_info.model_dump(exclude_unset=True)
 
             # Actualizar y obtener el resultado
             result = db.contact_collection.update_one(
-                {"username": username},
+                {"username": username, "_id": id},
                 {"$set": updated_values}
             )
 
@@ -92,16 +92,15 @@ def update_contact(username: str, updated_info: ContactModel):
             raise e
 
 # eliminar contacto
-def delete_contact(username: str):
+def delete_contact(id: int, username: str):
     try:
         with get_database_instance() as db:
-            result = db.contact_collection.delete_one({"username": username})
+            result = db.contact_collection.delete_one({"username": username, "_id": id})
 
             if result.deleted_count > 0:
                 message = {"message": "Información de contacto eliminada exitosamente"}
                 return message
             else:
-                #raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe.")
                 return None
     except Exception as e:
         logger.exception(f"Error al eliminar info contacto: {e}")

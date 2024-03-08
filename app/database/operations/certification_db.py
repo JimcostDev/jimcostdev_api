@@ -74,12 +74,12 @@ def get_certifications_by_user(username: str) -> List[CertificationResponseModel
         raise e
 
 # actualizar certificación
-def update_certification(username: str, updated_info: CertificationModel):
+def update_certification(updated_info: CertificationModel, id: int, username: str):
     try:
         with get_database_instance() as db:
-            existing = db.certifications_collection.find_one({"username": username})
+            existing = db.certifications_collection.find_one({"username": username, "_id": id})
             if existing is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar certificación, el usuario '{username}' no existe o no tiene certificaciones")
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar certificación, el usuario '{username}' no existe o no tiene información asociada al id proporcionado.")
             
             # convertir el modelo a un diccionario
             updated_values = updated_info.model_dump(exclude_unset=True)
@@ -90,7 +90,7 @@ def update_certification(username: str, updated_info: CertificationModel):
             
             # actualizar y devolver el resultado
             result = db.certifications_collection.update_one(
-                {"username": username},
+                {"username": username, "_id": id},
                 {"$set": updated_values}
             )
             
@@ -105,10 +105,10 @@ def update_certification(username: str, updated_info: CertificationModel):
             raise e
 
 # eliminar certificación
-def delete_certification(username: str):
+def delete_certification(id: int, username: str):
     try:
         with get_database_instance() as db:
-            result = db.certifications_collection.delete_one({"username": username})
+            result = db.certifications_collection.delete_one({"username": username, "_id": id})
             
             if result.deleted_count > 0:
                 message = {"message": "Certificación eliminada exitosamente"}

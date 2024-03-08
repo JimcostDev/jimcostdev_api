@@ -63,21 +63,15 @@ def get_contact_endpoint(username: str):
 
 # actualizar info de contacto
 @router.put(
-    "/contact/{username}",
+    "/contact/{id}",
     tags=['contact'],
     status_code=status.HTTP_200_OK,
     summary="Actualizar datos de contacto",
     description="Actualiza la información de contacto con los datos proporcionados."
 )
-def update_contact_endpoint(username: str, updated_info: ContactModel, current_user: dict = Depends(check_user_role)):
+def update_contact_endpoint(updated_info: ContactModel, id: int, current_user: dict = Depends(check_user_role)):
         try:
-            # Verificar que el usuario actual esté actualizando su propia información
-            if current_user["username"] != username:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No tienes permiso para actualizar la información de otro usuario."
-                )
-            message = update_contact(username, updated_info)
+            message = update_contact(updated_info, id, current_user["username"])
             return message
         
         except Exception as ex:
@@ -86,27 +80,22 @@ def update_contact_endpoint(username: str, updated_info: ContactModel, current_u
 
 # eliminar info de contacto
 @router.delete(
-    "/contact/{username}",
+    "/contact/{id}",
     tags=['contact'],
     status_code=status.HTTP_200_OK,
     summary="Eliminar datos de contacto",
     description="Elimina la información de contacto del usuario."
 )
-def delete_contact_endpoint(username: str, current_user: dict = Depends(check_user_role)):
+def delete_contact_endpoint(id: int, current_user: dict = Depends(check_user_role)):
         try:
-            # Verificar que el usuario actual esté eliminando su propia información
-            if current_user["username"] != username:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="No tienes permiso para eliminar la información de otro usuario."
-                )
-            message = delete_contact(username)
+            username = current_user["username"]
+            message = delete_contact(id, username)
             if message:
                 return message
             else:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe."
+                    detail=f"No se pudo encontrar la información de contacto, el usuario '{username}' no existe no tiene información asociada al id proporcionado."
                 )
         except Exception as ex:
             logger.error(f'rou= Error inesperado al eliminar el contacto: {str(ex)}')
