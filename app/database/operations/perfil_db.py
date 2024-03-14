@@ -109,3 +109,65 @@ def remove_skill(skill: str, username: str):
     except Exception as e:
             logger.exception(f"Ha ocurrido una excepción al remover habilidad: {e}")
             raise e
+
+# obtener perfil
+def get_perfil(username: str) -> PerfilResponseModel:
+    try:
+        # Obtener la instancia de la base de datos
+        with get_database_instance() as db:
+            perfil = db.perfil_collection.find_one({"username": username})
+
+            if perfil:
+                perfil['id'] = perfil.pop('_id')
+                return perfil
+            else:
+                None
+    except Exception as e:
+        raise e
+
+
+# actualizar perfil
+def update_perfil(updated_info: PerfilModel, id: int, username: str):
+    try:
+        with get_database_instance() as db:
+            existing = db.perfil_collection.find_one({"username": username, "_id": id})
+            if existing is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar información de perfil, el usuario '{username}' no existe o no tiene información asociada al id proporcionado.")
+            
+            # convertir el modelo a un diccionario
+            updated_values = updated_info.model_dump(exclude_unset=True)
+            
+            # Convertir la URL a una cadena (si es necesario)
+            url_str = updated_values['avatar']
+            updated_values['avatar'] = str(url_str)
+            
+            # actualizar y devolver el resultado
+            result = db.perfil_collection.update_one(
+                {"username": username, "_id": id},
+                {"$set": updated_values}
+            )
+            
+            if result.matched_count  > 0 and result.modified_count > 0:
+                message = {"message": "Perfil actualizado exitosamente"}
+                return message
+            else:
+                message = {"message": "No se pudo actualizar la información de perfil o no se encontraron cambios."}
+                return message
+    except Exception as e:
+            logger.exception(f"Error al actualizar la información de perfil: {e}")
+            raise e
+
+# eliminar perfil
+def delete_perfil(id: int, username: str):
+    try:
+        with get_database_instance() as db:
+            result = db.perfil_collection.delete_one({"username": username, "_id": id})
+            
+            if result.deleted_count > 0:
+                message = {"message": "Perfil eliminado exitosamente"}
+                return message
+            else:
+                return None
+    except Exception as e:
+        logger.exception(f"Error al eliminar perfil: {e}")
+        raise e

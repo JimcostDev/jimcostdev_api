@@ -8,8 +8,10 @@ from utils.auth_manager import check_user_role
 from database.operations.perfil_db import (
     create_perfil,
     add_skill,
-    remove_skill
-    
+    remove_skill,
+    get_perfil,
+    update_perfil,
+    delete_perfil
 )
 from database.models.perfil_model import PerfilModel, PerfilResponseModel
 import logging
@@ -69,4 +71,64 @@ def remove_skill_endpoint(skill: str, current_user: dict = Depends(check_user_ro
             return removed_skill
     except Exception as ex:
         logger.error(f'ro= Error inesperado al remover habilidad del perfil: {str(ex)}')
+        raise ex
+
+# obtener perfil
+@router.get(
+    "/perfil/{username}",
+    tags=['perfil'],
+    response_model=PerfilResponseModel,
+    summary="Obtener perfil",
+    description="Obtiene el perfil del usuario."
+)
+def get_perfil_endpoint(username: str):
+    try:
+        perfil = get_perfil(username)
+        if  perfil is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, '{username}' no existe.")
+        return perfil
+    except Exception as ex:
+        logger.error(f'ro= Error inesperado al obtener perfil: {str(ex)}')
+        raise ex
+
+# actualizar perfil
+@router.put(
+    "/perfil/{id}",
+    tags=['perfil'],
+    status_code=status.HTTP_200_OK,
+    summary="Actualizar perfil",
+    description="Actualiza el perfil del usuario."
+)
+def update_perfil_endpoint(updated_info: PerfilModel, id: int, current_user: dict = Depends(check_user_role)):
+    try:
+        username = current_user["username"]
+        message  = update_perfil(updated_info, id, username)
+        return message
+    except Exception as ex:
+        logger.error(f'ro= Error inesperado al actualizar perfil: {str(ex)}')
+        raise ex
+
+
+# eliminar perfil
+@router.delete(
+    "/perfil/{id}",
+    tags=['perfil'],
+    status_code=status.HTTP_200_OK,
+    summary="Eliminar perfil",
+    description="Elimina el perfil del usuario."
+)
+def delete_perfil_endpoint(id: int, current_user: dict = Depends(check_user_role)):
+    try:
+        username = current_user["username"]
+        message  = delete_perfil(id, username)
+        if message:
+            return message
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No se pudo encontrar la información de perfil, el usuario '{username}' no existe o no tiene información asociada al id proporcionado."
+            )
+    except Exception as ex:
+        logger.error(f'ro= Error inesperado al eliminar perfil: {str(ex)}')
         raise ex
