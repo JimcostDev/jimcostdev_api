@@ -19,15 +19,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Agregar la ruta para servir archivos estáticos, incluido el favicon
-app.mount("/templates", StaticFiles(directory="templates"), name="templates")
-
-@app.get("/", tags=['main'], response_class=HTMLResponse)
-def read_root():
-    # Lee el contenido del archivo HTML y devuélvelo como respuesta HTML
-    with open("templates/index.html", "r", encoding="utf-8") as html_file:
-        content = html_file.read()
-    return HTMLResponse(content=content)
+# incluir el favicon
+app.mount("/favicon.ico", StaticFiles(directory="assets"), name="favicon")
 
 # Función para cargar rutas dinámicamente
 def load_routes(app):

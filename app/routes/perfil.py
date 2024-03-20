@@ -77,7 +77,6 @@ def remove_skill_endpoint(skill: str, current_user: dict = Depends(check_user_ro
 @router.get(
     "/perfil/{username}",
     tags=['perfil'],
-    response_model=PerfilResponseModel,
     summary="Obtener perfil",
     description="Obtiene el perfil del usuario."
 )
