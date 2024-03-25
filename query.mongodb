@@ -3,3 +3,18 @@ db.education.find({username: 'rjak', _id: 5})
 
 use("jimcostdev_api")
 db.education.deleteOne({username: 'rjak', _id: 5})
+
+use("jimcostdev_api")
+db.work_experience.updateMany({}, {$set: {username: 'jimcostdev'}})
+
+use("jimcostdev_api")
+db.work_experience.insertOne({
+        _id: 5,
+        rol: "Freelance Developer",
+        company: "jimcostdev",
+        location: "Cali, Colombia",
+        activities: " Desarrollo de APIs.",
+        initial_date: "2022-01-01",
+        end_date: null,
+        username: "jimcostdev"
+})
