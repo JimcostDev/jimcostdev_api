@@ -9,7 +9,8 @@ from database.operations.work_experience_db import (
     get_work_experiences_by_user,
     create_work_experience,
     update_work_experience,
-    delete_work_experience
+    delete_work_experience,
+    get_total_work_experience
 )
 from database.models.work_experience_model import WorkExperienceModel, WorkExperienceResponseModel
 import logging
@@ -97,4 +98,20 @@ def delete_work_experience_endpoint(id: int, current_user: dict = Depends(check_
             )
     except Exception as ex:
         logger.error(f'ro= Error inesperado al eliminar experiencia laboral: {str(ex)}')
+        raise ex
+
+# obtener la experiencia laboral por total en años
+@router.get(
+    "/work_experience/total_years/{username}",
+    tags=['work_experience'],
+    summary="Obtener la experiencia laboral total en años de un usuario",
+    description="Este endpoint permite obtener la experiencia laboral total en años de un usuario"
+)
+def get_total_work_experience_endpoint(username: str):
+    try:
+        total_years = get_total_work_experience(username)
+        return total_years
+    except Exception as ex:
+        logger.error(
+            f'rou= Error inesperado al obtener la experiencia laboral: {str(ex)}')
         raise ex

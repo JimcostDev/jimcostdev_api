@@ -44,6 +44,20 @@ def calculate_duration(initial_date: str, end_date: str) -> str:
         else:
             return f"{duration_years} años y {duration_months} meses"
 
+# función para calcular la duración de una experiencia laboral en años
+def calculate_duration_years(initial_date: str, end_date: str) -> float:
+    if end_date is None:
+        end_date_obj = datetime.now()
+    else:
+        end_date_obj = datetime.fromisoformat(end_date)
+    
+    initial_date_obj = datetime.fromisoformat(initial_date)
+    duration = end_date_obj - initial_date_obj
+    duration_years = duration.days / 365
+    
+    return duration_years
+
+
 # obtener todas las experiencias laborales de un usuario
 def get_work_experiences_by_user(username: str) -> List[WorkExperienceResponseModel]:
     try:
@@ -65,6 +79,27 @@ def get_work_experiences_by_user(username: str) -> List[WorkExperienceResponseMo
                 work_experiences_list.append(work_experience_response)
                 
             return work_experiences_list
+            
+    except Exception as e:
+        logger.exception(f"Ha ocurrido una excepción al obtener la experiencia laboral del usuario: {e}")
+        raise e
+    
+# obtener la experiencia laboral por total en años
+def get_total_work_experience(username: str) -> int:
+    try:
+        # Obtener la instancia de la base de datos
+        with get_database_instance() as db:
+            # Obtener la experiencia laboral del usuario
+            work_experiences_cursor = db.work_experience_collection.find({"username": username})
+            
+            total_work_experience = 0
+            for work_experience in work_experiences_cursor:
+                # Calculamos la duración de la experiencia laboral
+                duration_years = calculate_duration_years(work_experience['initial_date'], work_experience['end_date'])
+                print(total_work_experience)
+                total_work_experience += duration_years
+
+            return round(total_work_experience)
             
     except Exception as e:
         logger.exception(f"Ha ocurrido una excepción al obtener la experiencia laboral del usuario: {e}")
