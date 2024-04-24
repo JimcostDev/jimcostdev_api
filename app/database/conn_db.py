@@ -1,6 +1,6 @@
 from pymongo import MongoClient, TEXT
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 class Database:
     def __init__(self, mongo_uri: str):
@@ -38,7 +38,7 @@ class Database:
 # Función para obtener una instancia de la base de datos
 def get_database_instance():
     # Obtener la cadena de conexión desde config.env
-    load_dotenv("config.env")
+    #load_dotenv("config.env")
     mongo_uri = os.getenv("MONGO_URI")
 
     # Instanciar la clase Database para manejar la conexión

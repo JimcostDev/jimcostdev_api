@@ -1,12 +1,12 @@
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from fastapi import  HTTPException, status, Depends
 from database.operations.user_db import get_user
 
 # Obtener secret_key
-load_dotenv("config.env")
+#load_dotenv("config.env")
 secret_key = os.getenv("JWT_SECRET_KEY")
 
 
