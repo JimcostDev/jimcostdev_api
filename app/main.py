@@ -13,7 +13,7 @@ app = FastAPI(
 # Configurar CORS (Cross-Origin Resource Sharing)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://jimcostdev.github.io/CV_JimcostDev/"],  # Reemplaza esto con el origen de tu aplicación web
+    allow_origins=["https://jimcostdev.github.io"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
