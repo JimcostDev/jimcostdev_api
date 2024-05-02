@@ -22,6 +22,11 @@ app.add_middleware(
 # incluir el favicon
 app.mount("/favicon.ico", StaticFiles(directory="assets"), name="favicon")
 
+# Ruta de healthcheck
+@app.get("/healthcheck", tags=["Healthcheck"])
+async def healthcheck():
+    return {"status": "OK"}
+
 # Función para cargar rutas dinámicamente
 def load_routes(app):
     routes_directory = Path(__file__).parent / "routes"
