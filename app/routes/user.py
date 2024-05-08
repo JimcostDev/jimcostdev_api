@@ -13,7 +13,8 @@ from database.operations.user_db import (
     get_user,
     get_user_by_email,
     update_user,
-    delete_user
+    delete_user,
+    update_password
 )
 from database.models.user_model import (
     UserCreateModel,
@@ -136,6 +137,24 @@ def update_user_endpoint(updated_info: UserUpdateModel, current_user: dict = Dep
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error inesperado al actualizar el usuario: {str(ex)}"
             )
+            
+# actualizar password
+@router.put(
+    "/users/password",
+    tags=['users'],
+    summary="Actualizar contraseña de usuario",
+    description="Este endpoint permite actualizar la contraseña de un usuario existente en la base de datos. "
+                "Proporciona el username del usuario en la URL y la información actualizada en el cuerpo de la solicitud. "
+                "Si la actualización es exitosa, retorna la información actualizada del usuario."
+)
+def update_password_endpoint(updated_info: UserUpdateModel, current_user: dict = Depends(check_user_role)):
+        try:
+            username = current_user["username"]
+            message = update_password(updated_info, username)
+            return message
+        except Exception as ex:
+            logger.error(f'ro= Error inesperado al actualizar password del usuario: {str(ex)}')
+            raise ex
 
 # eliminar usuario por su id
 @router.delete(

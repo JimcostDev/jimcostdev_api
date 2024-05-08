@@ -11,7 +11,8 @@ from pydantic import (
 
 from database.models.user_model import (
     UserCreateModel, 
-    UserUpdateModel
+    UserUpdateModel,
+    UserUpdatePasswordModel
 )
 
 from database.conn_db import get_database_instance
@@ -47,7 +48,7 @@ def create_user(new_user_data: UserCreateModel):
     with get_database_instance() as db:
         try:
             # Validate fields
-            user_data = new_user_data.dict(exclude_unset=True)
+            user_data = new_user_data.model_dump(exclude_unset=True)
             
             # Add fields
             user_data['created_at'] = str(datetime.utcnow())
@@ -148,14 +149,13 @@ def update_user(updated_info: UserUpdateModel, username: str):
             if updated_info.email != existing_user['email']:
                 if user_exists_by_email(db, updated_info.email):
                     raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"No se pudo actualizar el usuario, el email: '{updated_info.email}' ya está en uso.")
-                    #return {"message": f"No se pudo actualizar el usuario, el email: '{updated_info.email}' ya está en uso."}, status.HTTP_404_NOT_FOUND
               
-            updated_values = updated_info.dict(exclude_unset=True)
+            updated_values = updated_info.model_dump(exclude_unset=True)
             updated_values['updated_at'] = str(datetime.utcnow())
             # Excluir 'confirm_password' antes de la inserción
             updated_values.pop('confirm_password', None)
             # Excluir 'confirm_password' de updated_info también
-            updated_info.dict().pop('confirm_password', None)
+            updated_info.model_dump().pop('confirm_password', None)
                 
             # Hashear la contraseña si se actualiza
             if 'password' in updated_values:
@@ -186,6 +186,48 @@ def update_user(updated_info: UserUpdateModel, username: str):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error inesperado al actualizar el usuario: {ex}"
             )
+            
+# actualizar contraseña
+def update_password(updated_info: UserUpdatePasswordModel, username: str):
+    with get_database_instance() as db:
+        try:
+            existing_user = db.users_collection.find_one({"username": username})
+            if existing_user is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="El usuario no existe.")
+            
+            updated_values = updated_info.model_dump(exclude_unset=True)
+            updated_values['updated_at'] = str(datetime.utcnow())
+            # Excluir 'confirm_password' antes de la inserción
+            updated_values.pop('confirm_password', None)
+            # Excluir 'confirm_password' de updated_info también
+            updated_info.model_dump().pop('confirm_password', None)
+            
+            # Hashear la contraseña si se actualiza
+            if 'password' in updated_values:
+                hashed_password = hash_password(updated_values['password'])
+                updated_values['password'] = hashed_password
+            else:
+                # Asegúrate de que la contraseña existente no se modifique
+                updated_values.pop('password', None)
+            
+            # Actualizar y obtener el resultado
+            result = db.users_collection.update_one(
+                {"username": username},
+                {"$set": updated_values}
+            )
+
+            if result.matched_count > 0 and result.modified_count > 0:
+                return {"message": "Se actualizó la contraseña exitosamente"}
+            else:
+                return {"message": "Usuario no encontrado o no se realizó ninguna actualización"}
+        
+        except HTTPException as he:
+            logger.error(f"HTTPException: {he.detail}")
+            raise he
+    
+        except Exception as ex:
+            logger.exception(f"Error inesperado al actualizar el usuario: {ex}")
+            raise HTTPException(detail=f"Error inesperado al actualizar el usuario: {ex}")
 
 # Eliminar usuario
 def delete_user(username: str) -> dict:

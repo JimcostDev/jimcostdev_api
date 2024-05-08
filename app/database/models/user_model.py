@@ -6,11 +6,11 @@ class GoogleAuthModel(BaseModel):
 
 class UserBase(BaseModel):
     """Schema for creating a User."""
-    full_name: constr(min_length=2, max_length=50) = Field(..., description="Nombre completo de usuario (entre 2 y 50 caracteres)")
-    username: constr(min_length=2, max_length=20) = Field(..., description="Identidicador de usuario (entre 2 y 20 caracteres)")
+    full_name: str = Field(..., description="Nombre completo de usuario ")
+    username: str = Field(..., description="Identidicador de usuario ")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
-    password: constr(min_length=8)
-    confirm_password: constr(min_length=8)
+    password: str
+    confirm_password: str
     
     @validator('confirm_password')
     def passwords_match(cls, v, values, **kwargs):
@@ -31,12 +31,12 @@ class UserBase(BaseModel):
         return v
         
 class UserUpdateModel(BaseModel):
-    full_name: constr(min_length=2, max_length=50) = Field(..., description="Nombre completo de usuario (entre 2 y 50 caracteres)")
-    email: EmailStr = Field(..., description="Dirección de correo electrónico")
-    password: Optional[constr(min_length=8)] = None
-    confirm_password: Optional[constr(min_length=8)] = None
+    full_name: Optional[str] = Field(None, description="Nombre completo de usuario")
+    email: Optional[EmailStr] = Field(None, description="Dirección de correo electrónico")
+    password: Optional[str] = None
+    confirm_password: Optional[str] = None
     roles: Optional[str] = None
-    reset_password_token: Optional[str] = None  #propiedad para el token de restablecimiento de contraseña
+    reset_password_token: Optional[str] = None
     
     @validator('confirm_password', pre=True, always=True)
     def passwords_match(cls, v, values, **kwargs):
@@ -57,6 +57,36 @@ class UserUpdateModel(BaseModel):
                 raise ValueError('La contraseña debe contener al menos un carácter especial')
         return v
 
+class UserUpdatePasswordModel(BaseModel):
+    password: str
+    confirm_password: str
+    
+    @validator('confirm_password', pre=True, always=True)
+    def passwords_match(cls, v, values, **kwargs):
+        if 'password' in values and v != values['password']:
+            raise ValueError('Las contraseñas no coinciden')
+        return v
+
+    @validator('password', pre=True, always=True)
+    def validate_password(cls, v):
+        if v is not None:
+            if not any(c.isupper() for c in v):
+                raise ValueError('La contraseña debe contener al menos una letra mayúscula')
+            if not any(c.islower() for c in v):
+                raise ValueError('La contraseña debe contener al menos una letra minúscula')
+            if not any(c.isdigit() for c in v):
+                raise ValueError('La contraseña debe contener al menos un número')
+            if not any(c in '!@#$%^&*:' for c in v):
+                raise ValueError('La contraseña debe contener al menos un carácter especial')
+        return v  
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "password": "Cambiar123*",
+                "confirm_password": "Cambiar123*"
+            }
+        }
+
 class UserCreateModel(UserBase):
     class Config:
         json_schema_extra = {
@@ -71,8 +101,8 @@ class UserCreateModel(UserBase):
     
 class UserResponseModel(BaseModel):
     id: int = Field(..., description="Identificador único del contacto.")
-    full_name: constr(min_length=2, max_length=50) = Field(..., description="Nombre completo de usuario (entre 2 y 50 caracteres)")
-    username: constr(min_length=2, max_length=20) = Field(..., description="Identidicador de usuario (entre 2 y 20 caracteres)")
+    full_name: str = Field(..., description="Nombre completo de usuario ")
+    username: str = Field(..., description="Identidicador de usuario ")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
     class Config:
         # Excluir campos específicos al crear la instancia de UserResponseModel
