@@ -23,7 +23,7 @@ app.add_middleware(
 app.mount("/favicon.ico", StaticFiles(directory="assets"), name="favicon")
 
 # Ruta de healthcheck
-@app.get("/healthcheck", tags=["Healthcheck"])
+@app.get("/healthcheck", tags=["healthcheck"])
 async def healthcheck():
     return {"status": "OK"}
 

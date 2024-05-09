@@ -10,9 +10,9 @@ from pydantic import (
 )
 
 from database.models.user_model import (
-    UserCreateModel, 
+    UserModel, 
     UserUpdateModel,
-    UserUpdatePasswordModel
+    UserResponseModel
 )
 
 from database.conn_db import get_database_instance
@@ -23,6 +23,8 @@ from pymongo.errors import PyMongoError
 import logging
 
 logger = logging.getLogger(__name__)
+
+
 
 # verificar si usuario existe
 def user_exists_by_email(db, user_email: str) -> bool:
@@ -44,15 +46,18 @@ def user_exists_by_username(db, username: str) -> bool:
         return False
 
 # crear usuario
-def create_user(new_user_data: UserCreateModel):
+def create_user(new_user_data: UserModel):
     with get_database_instance() as db:
         try:
             # Validate fields
             user_data = new_user_data.model_dump(exclude_unset=True)
             
+            #fecha y hora actual
+            current_time = datetime.now()
+            
             # Add fields
-            user_data['created_at'] = str(datetime.utcnow())
-            user_data['updated_at'] = str(datetime.utcnow())
+            user_data['created_at'] = str(current_time)
+            user_data['updated_at'] = str(current_time)
             user_data['roles'] = ['admin']
             
             # Remove 'confirm_password' before insertion and hashed 'password'
@@ -104,7 +109,7 @@ def create_user(new_user_data: UserCreateModel):
             )
 
 # obtener user por su username
-def get_user(username: str) -> dict:
+def get_user(username: str) -> UserResponseModel:
     try:
         # Obtener la instancia de la base de datos
         with get_database_instance() as db:
@@ -114,13 +119,12 @@ def get_user(username: str) -> dict:
                 user['id'] = user.pop('_id')
                 return user
             else:
-                #raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"No se pudo encontrar la información del usuario, '{username}' no existe.")
                 return None
     except Exception as e:
         raise e
 
 # obtener user por su email
-def get_user_by_email(email: EmailStr) -> Optional[dict]:
+def get_user_by_email(email: EmailStr) -> UserResponseModel:
     try:
         # Obtener la instancia de la base de datos
         with get_database_instance() as db:
@@ -143,15 +147,17 @@ def update_user(updated_info: UserUpdateModel, username: str):
 
             if existing_user is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="El usuario no existe.")
-                #return {"message": "El usuario no existe."}, status.HTTP_404_NOT_FOUND
            
             # Verificar si el email actualizado ya existe en otro usuario
             if updated_info.email != existing_user['email']:
                 if user_exists_by_email(db, updated_info.email):
                     raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"No se pudo actualizar el usuario, el email: '{updated_info.email}' ya está en uso.")
+            
+            #fecha y hora actual
+            current_time = datetime.now()
               
             updated_values = updated_info.model_dump(exclude_unset=True)
-            updated_values['updated_at'] = str(datetime.utcnow())
+            updated_values['updated_at'] = str(current_time)
             # Excluir 'confirm_password' antes de la inserción
             updated_values.pop('confirm_password', None)
             # Excluir 'confirm_password' de updated_info también
@@ -172,52 +178,7 @@ def update_user(updated_info: UserUpdateModel, username: str):
             )
 
             if result.matched_count > 0 and result.modified_count > 0:
-                return {"message": "Usuario actualizado exitosamente"}, status.HTTP_200_OK
-            else:
-                return {"message": "Usuario no encontrado o no se realizó ninguna actualización"}, status.HTTP_404_NOT_FOUND
-        
-        except HTTPException as he:
-            logger.error(f"HTTPException: {he.detail}")
-            raise he
-    
-        except Exception as ex:
-            logger.exception(f"Error inesperado al actualizar el usuario: {ex}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error inesperado al actualizar el usuario: {ex}"
-            )
-            
-# actualizar contraseña
-def update_password(updated_info: UserUpdatePasswordModel, username: str):
-    with get_database_instance() as db:
-        try:
-            existing_user = db.users_collection.find_one({"username": username})
-            if existing_user is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="El usuario no existe.")
-            
-            updated_values = updated_info.model_dump(exclude_unset=True)
-            updated_values['updated_at'] = str(datetime.utcnow())
-            # Excluir 'confirm_password' antes de la inserción
-            updated_values.pop('confirm_password', None)
-            # Excluir 'confirm_password' de updated_info también
-            updated_info.model_dump().pop('confirm_password', None)
-            
-            # Hashear la contraseña si se actualiza
-            if 'password' in updated_values:
-                hashed_password = hash_password(updated_values['password'])
-                updated_values['password'] = hashed_password
-            else:
-                # Asegúrate de que la contraseña existente no se modifique
-                updated_values.pop('password', None)
-            
-            # Actualizar y obtener el resultado
-            result = db.users_collection.update_one(
-                {"username": username},
-                {"$set": updated_values}
-            )
-
-            if result.matched_count > 0 and result.modified_count > 0:
-                return {"message": "Se actualizó la contraseña exitosamente"}
+                return {"message": "Usuario actualizado exitosamente"}
             else:
                 return {"message": "Usuario no encontrado o no se realizó ninguna actualización"}
         
@@ -228,9 +189,9 @@ def update_password(updated_info: UserUpdatePasswordModel, username: str):
         except Exception as ex:
             logger.exception(f"Error inesperado al actualizar el usuario: {ex}")
             raise HTTPException(detail=f"Error inesperado al actualizar el usuario: {ex}")
-
+                   
 # Eliminar usuario
-def delete_user(username: str) -> dict:
+def delete_user(username: str):
     with get_database_instance() as db:
         try:
             result = db.users_collection.delete_one({"username": username})

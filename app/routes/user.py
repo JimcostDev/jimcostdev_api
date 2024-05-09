@@ -13,11 +13,10 @@ from database.operations.user_db import (
     get_user,
     get_user_by_email,
     update_user,
-    delete_user,
-    update_password
+    delete_user
 )
 from database.models.user_model import (
-    UserCreateModel,
+    UserModel,
     UserResponseModel,
     UserUpdateModel
 )
@@ -39,7 +38,7 @@ router = APIRouter()
                 "La información del usuario debe ser proporcionada en el cuerpo de la solicitud. "
                 "Tras la creación exitosa, retorna un mensaje confirmando que el usuario ha sido creado."
 )
-def create_user_endpoint(new_user_data: UserCreateModel):
+def create_user_endpoint(new_user_data: UserModel):
     """
     Crea un nuevo usuario.
 
@@ -120,42 +119,12 @@ def get_userbyEmail_endpoint(email: EmailStr):
 def update_user_endpoint(updated_info: UserUpdateModel, current_user: dict = Depends(check_user_role)):
         try:
             username = current_user["username"]
-            message, http_status = update_user(updated_info, username)
-
-            if http_status == status.HTTP_200_OK:
-                return message
-            else:
-                raise HTTPException(
-                    status_code=http_status,
-                    detail=f"Error al crear el usuario. Status Code: {http_status}"
-                )
-        except HTTPException as e:
-            logger.error(f"HTTPException: {e.detail}")
-            raise e
-        except Exception as ex:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error inesperado al actualizar el usuario: {str(ex)}"
-            )
-            
-# actualizar password
-@router.put(
-    "/users/password",
-    tags=['users'],
-    summary="Actualizar contraseña de usuario",
-    description="Este endpoint permite actualizar la contraseña de un usuario existente en la base de datos. "
-                "Proporciona el username del usuario en la URL y la información actualizada en el cuerpo de la solicitud. "
-                "Si la actualización es exitosa, retorna la información actualizada del usuario."
-)
-def update_password_endpoint(updated_info: UserUpdateModel, current_user: dict = Depends(check_user_role)):
-        try:
-            username = current_user["username"]
-            message = update_password(updated_info, username)
+            message = update_user(updated_info, username)
             return message
         except Exception as ex:
-            logger.error(f'ro= Error inesperado al actualizar password del usuario: {str(ex)}')
+            logger.error(f'ro= Error inesperado al actualizar usuario: {str(ex)}')
             raise ex
-
+            
 # eliminar usuario por su id
 @router.delete(
     "/users/",

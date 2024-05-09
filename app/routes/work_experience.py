@@ -100,7 +100,7 @@ def delete_work_experience_endpoint(id: int, current_user: dict = Depends(check_
         logger.error(f'ro= Error inesperado al eliminar experiencia laboral: {str(ex)}')
         raise ex
 
-# obtener la experiencia laboral por total en años
+# obtener la experiencia laboral total en años
 @router.get(
     "/work_experience/total_years/{username}",
     tags=['work_experience'],
