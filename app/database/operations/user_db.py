@@ -12,7 +12,8 @@ from pydantic import (
 from database.models.user_model import (
     UserModel, 
     UserUpdateModel,
-    UserResponseModel
+    UserResponseModel,
+    ResetPasswordModel
 )
 
 from database.conn_db import get_database_instance
@@ -189,6 +190,56 @@ def update_user(updated_info: UserUpdateModel, username: str):
         except Exception as ex:
             logger.exception(f"Error inesperado al actualizar el usuario: {ex}")
             raise HTTPException(detail=f"Error inesperado al actualizar el usuario: {ex}")
+
+# restablecer contraseña de usuario
+def reset_password(updated_info: ResetPasswordModel, username: str, secret: str):
+    with get_database_instance() as db:
+        try: 
+            existing_user = db.users_collection.find_one({"username": username})
+            if existing_user is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="El usuario no existe.")
+            
+            existing_user_secret = existing_user['secret']
+            if secret != existing_user_secret:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="No autorizado para restablecer la contraseña.")
+            
+            
+            #fecha y hora actual
+            current_time = datetime.now()
+              
+            updated_values = updated_info.model_dump(exclude_unset=True)
+            updated_values['updated_at'] = str(current_time)
+            # Excluir 'confirm_password' antes de la inserción
+            updated_values.pop('confirm_password', None)
+            # Excluir 'confirm_password' de updated_info también
+            updated_info.model_dump().pop('confirm_password', None)
+                
+            # Hashear la contraseña si se actualiza
+            if 'password' in updated_values:
+                hashed_password = hash_password(updated_values['password'])
+                updated_values['password'] = hashed_password
+            else:
+                # Asegúrate de que la contraseña existente no se modifique
+                updated_values.pop('password', None)
+                    
+            # Actualizar y obtener el resultado
+            result = db.users_collection.update_one(
+                {"username": username},
+                {"$set": updated_values}
+            )
+
+            if result.matched_count > 0 and result.modified_count > 0:
+                return {"message": "Contraseña restablecida exitosamente"}
+            else:
+                return {"message": "Usuario no encontrado o no se realizó ninguna actualización"}
+        
+        except HTTPException as he:
+            logger.error(f"HTTPException: {he.detail}")
+            raise he
+    
+        except Exception as ex:
+            logger.exception(f"Error inesperado al restablecer contraseña del usuario: {ex}")
+            raise HTTPException(detail=f"Error inesperado al restablecer contraseña del usuario: {ex}")
                    
 # Eliminar usuario
 def delete_user(username: str):

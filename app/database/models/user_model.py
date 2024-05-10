@@ -26,6 +26,7 @@ class UserModel(BaseModel):
     full_name: str = Field(..., description="Nombre completo de usuario ")
     username: str = Field(..., description="Identidicador de usuario ")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
+    secret: str = Field(..., description="Palabra secreta para recuperar contraseña (puede ser una frase, el nombre de tu mascota, color favorito, etc.)")
     password: str
     confirm_password: str
 
@@ -42,10 +43,9 @@ class UserModel(BaseModel):
 
 
 class UserUpdateModel(BaseModel):
-    full_name: Optional[str] = Field(
-        None, description="Nombre completo de usuario")
-    email: Optional[EmailStr] = Field(
-        None, description="Dirección de correo electrónico")
+    full_name: Optional[str] = Field(None, description="Nombre completo de usuario")
+    email: Optional[EmailStr] = Field(None, description="Dirección de correo electrónico")
+    secret: Optional[str] = Field(None, description="Palabra secreta para recuperar contraseña (puede ser una frase, el nombre de tu mascota, color favorito, etc.)")
     password: Optional[str] = None
     confirm_password: Optional[str] = None
     roles: Optional[str] = None
@@ -62,6 +62,21 @@ class UserUpdateModel(BaseModel):
         PasswordStrengthCheck.validate_password_strength(v)
         return v
 
+
+class ResetPasswordModel(BaseModel):
+    password: Optional[str] = None
+    confirm_password: Optional[str] = None
+
+    @validator('confirm_password', pre=True, always=True)
+    def passwords_match(cls, v, values, **kwargs):
+        if 'password' in values and v != values['password']:
+            raise ValueError('Las contraseñas no coinciden')
+        return v
+
+    @validator('password')
+    def validate_password(cls, v):
+        PasswordStrengthCheck.validate_password_strength(v)
+        return v
 
 class UserResponseModel(BaseModel):
     id: int = Field(..., description="Identificador único del contacto.")

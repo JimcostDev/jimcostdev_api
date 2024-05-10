@@ -13,12 +13,14 @@ from database.operations.user_db import (
     get_user,
     get_user_by_email,
     update_user,
-    delete_user
+    delete_user,
+    reset_password
 )
 from database.models.user_model import (
     UserModel,
     UserResponseModel,
-    UserUpdateModel
+    UserUpdateModel,
+    ResetPasswordModel
 )
 from database.conn_db import get_database_instance
 from pydantic import EmailStr
@@ -120,6 +122,23 @@ def update_user_endpoint(updated_info: UserUpdateModel, current_user: dict = Dep
         try:
             username = current_user["username"]
             message = update_user(updated_info, username)
+            return message
+        except Exception as ex:
+            logger.error(f'ro= Error inesperado al actualizar usuario: {str(ex)}')
+            raise ex
+        
+# restablecer contraseña de usuario
+@router.put(
+    "/users/reset-password",
+    tags=['users'],
+    summary="Restablecer contraseña de usuario",
+    description="Este endpoint permite restablecer la contraseña de un usuario existente en la base de datos. "
+                "Proporciona el username y secreto del usuario en la URL y la nueva contraseña en el cuerpo de la solicitud. "
+                "Si la actualización es exitosa, retorna un mensaje confirmando que la contraseña ha sido restablecida."
+)
+def reset_password_endpoint(updated_info: ResetPasswordModel, username: str, secret: str):
+        try:
+            message = reset_password(updated_info, username, secret)
             return message
         except Exception as ex:
             logger.error(f'ro= Error inesperado al actualizar usuario: {str(ex)}')
