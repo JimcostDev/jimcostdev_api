@@ -13,7 +13,9 @@ app = FastAPI(
 # Configurar CORS (Cross-Origin Resource Sharing)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://cv.jimcostdev.com"],
+    allow_origins=["https://jimcostdev.github.io",
+                   "https://jimcostdev.com",
+                   "https://cv.jimcostdev.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
