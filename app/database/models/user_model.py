@@ -1,9 +1,9 @@
-from pydantic import BaseModel, Field, EmailStr, validator
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import Optional
 import re
 
 
-class PasswordStrengthCheck(BaseModel):
+class PasswordStrengthCheck:
     @staticmethod
     def validate_password_strength(password: str):
         if len(password) < 8:
@@ -30,13 +30,15 @@ class UserModel(BaseModel):
     password: str
     confirm_password: str
 
-    @validator('confirm_password')
-    def passwords_match(cls, v, values, **kwargs):
-        if 'password' in values and v != values['password']:
+    @field_validator('confirm_password')
+    @classmethod
+    def passwords_match(cls, v, info):
+        if v != info.data.get('password'):
             raise ValueError('Las contraseñas no coinciden')
         return v
 
-    @validator('password')
+    @field_validator('password')
+    @classmethod
     def validate_password(cls, v):
         PasswordStrengthCheck.validate_password_strength(v)
         return v
@@ -51,15 +53,18 @@ class UserUpdateModel(BaseModel):
     roles: Optional[str] = None
     reset_password_token: Optional[str] = None
 
-    @validator('confirm_password', pre=True, always=True)
-    def passwords_match(cls, v, values, **kwargs):
-        if 'password' in values and v != values['password']:
+    @field_validator('confirm_password')
+    @classmethod
+    def passwords_match(cls, v, info):
+        if v is not None and v != info.data.get('password'):
             raise ValueError('Las contraseñas no coinciden')
         return v
 
-    @validator('password')
+    @field_validator('password')
+    @classmethod
     def validate_password(cls, v):
-        PasswordStrengthCheck.validate_password_strength(v)
+        if v is not None:
+            PasswordStrengthCheck.validate_password_strength(v)
         return v
 
 
@@ -67,16 +72,20 @@ class ResetPasswordModel(BaseModel):
     password: Optional[str] = None
     confirm_password: Optional[str] = None
 
-    @validator('confirm_password', pre=True, always=True)
-    def passwords_match(cls, v, values, **kwargs):
-        if 'password' in values and v != values['password']:
+    @field_validator('confirm_password')
+    @classmethod
+    def passwords_match(cls, v, info):
+        if v is not None and v != info.data.get('password'):
             raise ValueError('Las contraseñas no coinciden')
         return v
 
-    @validator('password')
+    @field_validator('password')
+    @classmethod
     def validate_password(cls, v):
-        PasswordStrengthCheck.validate_password_strength(v)
+        if v is not None:
+            PasswordStrengthCheck.validate_password_strength(v)
         return v
+
 
 class UserResponseModel(BaseModel):
     id: int = Field(..., description="Identificador único del contacto.")
@@ -84,9 +93,11 @@ class UserResponseModel(BaseModel):
     username: str = Field(..., description="Identidicador de usuario ")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
 
-    class Config:
-        # Excluir campos específicos al crear la instancia de UserResponseModel
-        exclude = ["password", "confirm_password"]
+    model_config = {
+        "json_schema_extra": {
+            "exclude": ["password", "confirm_password"]
+        }
+    }
 
 
 class LoginUser(BaseModel):
@@ -94,10 +105,11 @@ class LoginUser(BaseModel):
     email: EmailStr
     password: str
 
-    class Config:
-        json_schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "email": "user@example.com",
                 "password": "securepassword",
             }
         }
+    }

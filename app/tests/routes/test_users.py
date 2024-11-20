@@ -1,75 +1,127 @@
 import pytest
-import httpx
-from unittest.mock import patch
+from fastapi.testclient import TestClient
+from unittest.mock import patch, MagicMock
+from routes.user import (
+    create_user_endpoint,
+    get_user_endpoint, 
+    get_userbyEmail_endpoint,
+    update_user_endpoint,
+    reset_password_endpoint,
+    delete_user_endpoint
+)
+from database.models.user_model import (
+    UserModel, 
+    UserResponseModel,
+    UserUpdateModel, 
+    ResetPasswordModel
+)
+from fastapi import HTTPException, status
 
-# URL base para los endpoints
-url_create = "https://jimcostdev.koyeb.app/users"
-url_get = "https://jimcostdev.koyeb.app/users/jimcostdev"
+# Sample test data
+test_user_data = UserModel(
+    full_name="Test User",
+    username="testuser",
+    email="test@example.com",
+    password="TestPassword123*",
+    confirm_password="TestPassword123*",
+    secret="testsecret"
+)
 
-# Datos de usuario para las pruebas
-user_data = {
-    "full_name": "Ronaldo Jiménez Acosta",
-    "username": "jimcostdev",
-    "email": "jimcostdev@gmail.com",
-    "secret": "supersecret",
-    "password": "Password123*",
-    "confirm_password": "Password123*"
-}
+def test_create_user_success():
+    """Test successful user creation"""
+    with patch('database.operations.user_db.user_exists_by_email', return_value=False), \
+         patch('database.operations.user_db.user_exists_by_username', return_value=False), \
+         patch('database.operations.user_db.create_user', return_value=(test_user_data.model_dump(), status.HTTP_201_CREATED)):
+        
+        result = create_user_endpoint(test_user_data)
+        assert result == {"message": "Usuario creado exitosamente"}
 
-# Respuesta simulada del servidor para un GET (cuando se obtiene el perfil de un usuario)
-mock_response_get = {
-    "id": 1,
-    "full_name": "Ronaldo Jiménez Acosta",
-    "username": "jimcostdev",
-    "email": "jimcostdev@gmail.com"
-}
+def test_create_user_email_exists():
+    """Test user creation with existing email"""
+    with patch('database.operations.user_db.user_exists_by_email', return_value=True):
+        with pytest.raises(HTTPException) as excinfo:
+            create_user_endpoint(test_user_data)
+        
+        assert excinfo.value.status_code == status.HTTP_409_CONFLICT
+        
 
-# Respuesta simulada del servidor para un POST (cuando se crea un usuario)
-mock_response_create = {
-    "message": "Usuario creado exitosamente"
-}
+def test_create_user_username_exists():
+    """Test user creation with existing username"""
+    with patch('database.operations.user_db.user_exists_by_email', return_value=False), \
+         patch('database.operations.user_db.user_exists_by_username', return_value=True):
+        with pytest.raises(HTTPException) as excinfo:
+            create_user_endpoint(test_user_data)
+        
+        assert excinfo.value.status_code == status.HTTP_409_CONFLICT
 
-# Fixtures para mockear las funciones de HTTP
-@pytest.fixture
-def mock_post():
-    with patch("httpx.Client.post") as mock:
-        yield mock
+def test_get_user_success():
+    """Test successful user retrieval by username"""
+    with patch('database.operations.user_db.get_user', return_value={
+        'id': 1,
+        'full_name': 'Test User',
+        'username': 'testuser',
+        'email': 'test@example.com'
+    }):
+        result = get_user_endpoint(test_user_data.username)
+        assert result.get('full_name') == 'Test User'
+        assert result.get('username') == 'testuser'
+        assert result.get('email') == 'test@example.com'
 
-@pytest.fixture
-def mock_get():
-    with patch("httpx.Client.get") as mock:
-        yield mock
+def test_get_user_by_email_success():
+    """Test successful user retrieval by email"""
+    with patch('database.operations.user_db.get_user_by_email', return_value={
+        'id': 1,
+        'full_name': 'Test User',
+        'username': 'testuser',
+        'email': 'test@example.com'
+    }):
+        result = get_userbyEmail_endpoint(test_user_data.email)
+        assert result.get('full_name') == 'Test User'
+        assert result.get('username') == 'testuser'
+        assert result.get('email') == 'test@example.com'
 
-# Test de creación de usuario
-def test_create_user(mock_post):
-    # Configuramos el mock para simular la respuesta de la API al crear un usuario
-    mock_post.return_value.status_code = 201
-    mock_post.return_value.json.return_value = mock_response_create
+def test_get_user_not_found():
+    """Test user retrieval for non-existent user"""
+    with patch('database.operations.user_db.get_user', return_value=None):
+        with pytest.raises(HTTPException) as excinfo:
+            get_user_endpoint("nonexistentuser")
+        
+        assert excinfo.value.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_get_user_by_email_not_found():
+    """Test user retrieval by non-existent email"""
+    with patch('database.operations.user_db.get_user_by_email', return_value=None):
+        with pytest.raises(HTTPException) as excinfo:
+            get_userbyEmail_endpoint("nonexistent@example.com")
+        
+        assert excinfo.value.status_code == status.HTTP_404_NOT_FOUND
+
+def test_update_user_success():
+    """Test successful user update"""
+    update_data = UserUpdateModel(full_name="Updated Name")
+    current_user = {"username": "testuser"}
     
-    # Llamamos a httpx.post directamente con los datos del usuario
-    with httpx.Client() as client:
-        response = client.post(url_create, json=user_data)
-    
-    # Verificamos que la respuesta sea correcta
-    assert response.status_code == 201
-    assert response.json() == mock_response_create
-    
-    # Verificamos que el mock fue llamado con los datos correctos
-    mock_post.assert_called_once_with(url_create, json=user_data)
+    with patch('database.operations.user_db.update_user', return_value={"message": "Usuario actualizado exitosamente"}), \
+         patch('routes.user.check_user_role', return_value=current_user):
+        
+        result = update_user_endpoint(update_data, current_user)
+        assert result == {"message": "Usuario actualizado exitosamente"}
 
-# Test de obtención de perfil de usuario
-def test_get_user_profile(mock_get):
-    # Configuramos el mock para simular la respuesta de la API al obtener el perfil
-    mock_get.return_value.status_code = 200
-    mock_get.return_value.json.return_value = mock_response_get
+def test_reset_password_success():
+    """Test successful password reset"""
+    reset_data = ResetPasswordModel(new_password="NewPassword123*")
     
-    # Usamos httpx.Client() para simular el GET a la API
-    with httpx.Client() as client:
-        response = client.get(url_get)
+    with patch('database.operations.user_db.reset_password', return_value={"message": "Contraseña restablecida exitosamente"}):
+        result = reset_password_endpoint(reset_data, "testuser", "testsecret")
+        assert result == {"message": "Contraseña restablecida exitosamente"}
+
+def test_delete_user_success():
+    """Test successful user deletion"""
+    current_user = {"username": "testuser"}
     
-    # Verificamos que la respuesta sea la esperada
-    assert response.status_code == 200
-    assert response.json() == mock_response_get
-    
-    # Verificamos que el mock de get fue llamado con la URL correcta
-    mock_get.assert_called_once_with(url_get)
+    with patch('database.operations.user_db.delete_user', return_value=("Usuario eliminado exitosamente", status.HTTP_200_OK)), \
+         patch('routes.user.check_user_role', return_value=current_user):
+        
+        result = delete_user_endpoint(current_user)
+        assert result == {"message": "Usuario eliminado exitosamente"}
