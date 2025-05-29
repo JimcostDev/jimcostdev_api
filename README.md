@@ -36,7 +36,7 @@ Este proyecto se encuentra en desarrollo y tiene como objetivo la creación de u
     ```
     Instalar dependencias individuales (opcional):
     ```bash
-    pip install "fastapi[standard]" pymongo pytest pytest-asyncio pydantic-settings bcrypt Faker python-jose
+    pip install "fastapi[standard]" motor pymongo pytest pytest-asyncio pydantic-settings aiobcrypt Faker python-jose
     ```
 
 4. Crea un archivo llamado `config.env` dentro de la carpeta `app`. Este archivo se utiliza para cargar las variables de entorno necesarias para la aplicación, como la `JWT_SECRET_KEY` y `MONGO_URI`. El archivo `config.env` debe contener:

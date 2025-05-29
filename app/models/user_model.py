@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator
-from typing import Optional
+from typing import List, Optional, Union
 import re
 
 
@@ -88,10 +88,11 @@ class ResetPasswordModel(BaseModel):
 
 
 class UserResponseModel(BaseModel):
-    id: int = Field(..., description="Identificador único del contacto.")
+    id: Union[int, str] = Field(..., description="Identificador único del contacto.")
     full_name: str = Field(..., description="Nombre completo de usuario ")
     username: str = Field(..., description="Identidicador de usuario ")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
+    roles: Optional[List[str]] = []
 
     model_config = {
         "json_schema_extra": {
