@@ -18,7 +18,7 @@ router = APIRouter(prefix="/users")
 service = UserService()
 
 @router.post(
-    "/",
+    "/p/",
     response_model=UserResponseModel,
     status_code=201,
     summary="Crear un nuevo usuario",
@@ -32,7 +32,7 @@ async def create_user_endpoint(new_user: UserModel):
         raise DatabaseException(str(e))
 
 @router.get(
-    "/{username}",
+    "/p/{username}",
     response_model=UserResponseModel,
     summary="Obtener usuario por nombre",
 )
@@ -40,7 +40,7 @@ async def get_user_endpoint(username: str):
     return await service.get_user(username)
 
 @router.get(
-    "/email/{email}",
+    "/p/email/{email}",
     response_model=UserResponseModel,
     summary="Obtener usuario por email",
 )

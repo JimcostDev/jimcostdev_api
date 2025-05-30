@@ -8,6 +8,8 @@ class BaseRepository:
         self.collection = collection
 
     async def _validate_id(self, id: str):
+        if id.isdigit():
+            return int(id)
         try:
             return ObjectId(id)
         except errors.InvalidId:

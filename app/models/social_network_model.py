@@ -5,13 +5,14 @@ class SocialNetworkModel(BaseModel):
     title: str = Field(..., description="Nombre de la red social")
     url: HttpUrl = Field(..., description="URL de la red social")
 
-    class Config:
-        schema_extra = {
+    model_config={
+        "json_schema_extra": {
             "example": {
                 "title": "linkedin",
                 "url": "https://www.linkedin.com/in/usuario"
             }
         }
+    }
 
 class SocialNetworkResponseModel(BaseModel):
     id: Union[str, int] = Field(..., description="ID único de la red social")
@@ -19,8 +20,8 @@ class SocialNetworkResponseModel(BaseModel):
     url: HttpUrl = Field(..., description="URL de la red social")
     username: Optional[str] = Field(None, description="Usuario propietario")
 
-    class Config:
-        schema_extra = {
+    model_config={
+        "json_schema_extra": {
             "example": {
                 "id": "60f7f9a5e1d3a2b4c5d6f7e8",
                 "title": "linkedin",
@@ -28,3 +29,4 @@ class SocialNetworkResponseModel(BaseModel):
                 "username": "user"
             }
         }
+    }

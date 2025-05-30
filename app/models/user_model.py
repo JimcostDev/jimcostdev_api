@@ -88,7 +88,7 @@ class ResetPasswordModel(BaseModel):
 
 
 class UserResponseModel(BaseModel):
-    id: Union[int, str] = Field(..., description="Identificador único del contacto.")
+    id: Union[int, str] = Field(..., description="Identificador único del usuario.")
     full_name: str = Field(..., description="Nombre completo de usuario ")
     username: str = Field(..., description="Identidicador de usuario ")
     email: EmailStr = Field(..., description="Dirección de correo electrónico")
