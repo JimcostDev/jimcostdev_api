@@ -15,6 +15,17 @@ class BaseRepository:
         except errors.InvalidId:
             raise NotFoundException("ID inválido")
 
+    async def find_by_username(self, username: str) -> list[dict]:
+        try:
+            cursor = self.collection.find({"username": username})
+            results = []
+            async for doc in cursor:
+                doc["_id"] = str(doc["_id"])
+                results.append(doc)
+            return results
+        except Exception as e:
+            raise DatabaseException(f"Error al buscar por username: {str(e)}")
+
     async def find_all(self):
         try:
             cursor = self.collection.find()

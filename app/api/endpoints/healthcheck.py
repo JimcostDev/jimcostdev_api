@@ -4,7 +4,7 @@ from core.database import mongodb
 
 router = APIRouter()
 
-# Endpoint de verificación de salud mejorado
+# Endpoint de verificación de salud 
 @router.get(
     "/healthcheck",
     include_in_schema=False,

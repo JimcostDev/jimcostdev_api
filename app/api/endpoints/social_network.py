@@ -31,10 +31,8 @@ async def list_social_networks(username: str):
     description="Obtiene una red social específica por su ID y usuario"
 )
 async def get_social_network(username: str, id: str):
-    try:
-        return await service.get_social_network(id, username)
-    except NotFoundException as e:
-        raise e
+    return await service.get_social_network(id, username)
+    
 
 # -- Operaciones privadas (POST, PUT, DELETE) --
 @router.post(
@@ -48,12 +46,8 @@ async def create_social_network(
     payload: SocialNetworkCreate,
     current_user=Depends(check_admin_role)
 ):
-    try:
-        return await service.create_social_network(payload, current_user.username)
-    except ConflictException as e:
-        raise e
-    except Exception as e:
-        raise DatabaseException(str(e))
+    return await service.create_social_network(payload, current_user.username)
+   
 
 @router.put(
     "/{id}",
@@ -67,12 +61,9 @@ async def update_social_network(
     payload: SocialNetworkCreate,
     current_user=Depends(check_admin_role)
 ):
-    try:
-        return await service.update_social_network(id, payload, current_user.username)
-    except (NotFoundException, ConflictException) as e:
-        raise e
-    except Exception as e:
-        raise DatabaseException(str(e))
+    return await service.update_social_network(id, payload, current_user.username)
+
+ 
 
 @router.delete(
     "/{id}",
@@ -84,7 +75,4 @@ async def delete_social_network(
     id: str,
     current_user=Depends(check_admin_role)
 ):
-    try:
-        await service.delete_social_network(id, current_user.username)
-    except NotFoundException as e:
-        raise e
+    await service.delete_social_network(id, current_user.username)

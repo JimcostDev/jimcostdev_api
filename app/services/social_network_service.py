@@ -22,6 +22,9 @@ class SocialNetworkService:
 
     async def list_social_networks(self, username: str) -> list[SocialNetworkResponse]:
         await self._init_repo()
+        existing = await self.repo.collection.find_one({"username": username})
+        if not existing:
+            raise NotFoundException(f"No se encontraron redes sociales para el usuario {username}")
         docs = await self.repo.find_by_username(username)
         return [SocialNetworkResponse(**{**d, "id": d.pop("_id")}) for d in docs]
 
