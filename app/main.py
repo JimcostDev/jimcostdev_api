@@ -14,6 +14,8 @@ from api.endpoints.certification import router as certification_router
 from api.endpoints.contact import router as contact_router
 from api.endpoints.education import router as education_router
 from api.endpoints.profile import router as profile_router
+from api.endpoints.project import router as project_router
+from api.endpoints.work_experience import router as work_experience_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -59,6 +61,8 @@ app.include_router(certification_router, prefix=settings.API_PREFIX, tags=["cert
 app.include_router(contact_router, prefix=settings.API_PREFIX, tags=["contact"])
 app.include_router(education_router, prefix=settings.API_PREFIX, tags=["education"])
 app.include_router(profile_router, prefix=settings.API_PREFIX, tags=["profile"])
+app.include_router(project_router, prefix=settings.API_PREFIX, tags=["projects"])
+app.include_router(work_experience_router, prefix=settings.API_PREFIX, tags=["work_experience"])
 
 # Archivos estáticos
 app.mount("/static", StaticFiles(directory="assets"), name="static")
