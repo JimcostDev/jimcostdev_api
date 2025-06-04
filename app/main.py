@@ -4,11 +4,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 from core.database import mongodb 
+
+# Importar routers de los endpoints
 from api.endpoints.healthcheck import router as healthcheck_router
 from api.endpoints.user  import router as user_router
 from api.endpoints.auth  import router as auth_router
 from api.endpoints.social_network import router as social_network_router
 from api.endpoints.certification import router as certification_router
+from api.endpoints.contact import router as contact_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,6 +54,7 @@ app.include_router(auth_router,  prefix=settings.API_PREFIX, tags=["auth"])
 app.include_router(user_router,  prefix=settings.API_PREFIX, tags=["users"])
 app.include_router(social_network_router, prefix=settings.API_PREFIX, tags=["social_networks"])
 app.include_router(certification_router, prefix=settings.API_PREFIX, tags=["certifications"])
+app.include_router(contact_router, prefix=settings.API_PREFIX, tags=["contact"])
 
 # Archivos estáticos
 app.mount("/static", StaticFiles(directory="assets"), name="static")

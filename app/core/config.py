@@ -15,16 +15,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     PROJECT_NAME: str = "JimcostDev API"
     PROJECT_DESCRIPTION: str = (
-        "Bienvenido a la API de Mi Portafolio, diseñada para gestionar "
-        "información sobre mi perfil, proyectos y más."
+        "API desarrollada con FastAPI para administrar de manera eficiente mi CV y portafolio profesional."
     )
-    PROJECT_VERSION: str = "1.0.0"
+    PROJECT_VERSION: str = "2.0.0"
     API_PREFIX: str = ""
     CORS_ORIGINS: List[str] = [
         "https://jimcostdev.github.io",
         "https://jimcostdev.com",
         "https://cv.jimcostdev.com",
         "https://jimcostdev-astro.vercel.app",
+        "http://localhost:4321/",
     ]
 
     model_config = SettingsConfigDict(
