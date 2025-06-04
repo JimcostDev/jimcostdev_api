@@ -12,6 +12,8 @@ from api.endpoints.auth  import router as auth_router
 from api.endpoints.social_network import router as social_network_router
 from api.endpoints.certification import router as certification_router
 from api.endpoints.contact import router as contact_router
+from api.endpoints.education import router as education_router
+from api.endpoints.profile import router as profile_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -55,6 +57,8 @@ app.include_router(user_router,  prefix=settings.API_PREFIX, tags=["users"])
 app.include_router(social_network_router, prefix=settings.API_PREFIX, tags=["social_networks"])
 app.include_router(certification_router, prefix=settings.API_PREFIX, tags=["certifications"])
 app.include_router(contact_router, prefix=settings.API_PREFIX, tags=["contact"])
+app.include_router(education_router, prefix=settings.API_PREFIX, tags=["education"])
+app.include_router(profile_router, prefix=settings.API_PREFIX, tags=["profile"])
 
 # Archivos estáticos
 app.mount("/static", StaticFiles(directory="assets"), name="static")
