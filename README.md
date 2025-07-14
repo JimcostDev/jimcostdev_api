@@ -39,12 +39,17 @@ Sigue los siguientes pasos para instalar y ejecutar el proyecto localmente:
    pip install -r requirements.txt
    ```
 
-   *Opcionalmente, puedes instalar dependencias individuales:*
+   **🔄 Actualización de dependencias (opcional)**
+   Si deseas actualizar todas las dependencias desde cero:
 
    ```bash
-   pip install "fastapi[standard]" motor pymongo pytest pytest-asyncio pydantic-settings aiobcrypt Faker python-jose
+   pip uninstall -y -r requirements.txt
+   pip install -r requirements.txt
    ```
-
+   También puedes actualizar paquetes de forma individual: 
+   ```bash
+   pip install --upgrade nombre-del-paquete
+   ```
 4. **Configura las variables de entorno:**
    Crea un archivo `config.env` dentro de la carpeta `app/core/` con el siguiente contenido:
 
