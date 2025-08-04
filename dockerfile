@@ -1,41 +1,26 @@
-# syntax = docker/dockerfile:1.5
+# syntax=docker/dockerfile:1.5
 
-########################
-# Etapa de construcción
-########################
-FROM python:3.11-slim AS builder
+##############################
+# Etapa única: build + runtime
+##############################
+FROM python:3.11-slim
 
-# Instala dependencias del sistema para compilar extensiones si hiciera falta
+# 1) Instala herramientas de compilación (solo si haces extensiones nativas)
 RUN apt-get update \
  && apt-get install -y --no-install-recommends build-essential \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copia el fichero de dependencias desde dentro de app/
+# 2) Copia las dependencias y las instala
 COPY app/requirements.txt .
-
-# Instala las dependencias Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copia el resto del código de la aplicación
+# 3) Copia el código de tu FastAPI
 COPY app ./app
 
-##############################
-# Etapa de producción
-##############################
-FROM python:3.11-slim
-
-WORKDIR /app
-
-# Copia las librerías instaladas en builder
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-
-# Copia el código de la aplicación
-COPY --from=builder /app/app ./app
-
-# Expone el puerto de FastAPI
+# 4) Expone el puerto en el que correrá Uvicorn
 EXPOSE 8000
 
-# Arranca FastAPI con Uvicorn
+# 5) Arranca tu API con Uvicorn
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
