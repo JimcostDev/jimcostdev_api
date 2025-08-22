@@ -1,18 +1,18 @@
 use("jimcostdev_api");
 
 var collection = 'perfil';
-var username = 'jimcostdev'; 
+var username = 'test'; 
 
 // Utiliza el método update con $push para añadir elementos al array 'skills'
 // $each Agrega múltiples valores al campo del Array.
-db.getCollection(collection).update(
+db.getCollection(collection).updateOne(
    {
       username: username
    },
    {
       $push: {
          skills: {
-            $each: ["fastapi"]
+            $each: ["postgresql"]
          }
       }
    }

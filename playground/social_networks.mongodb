@@ -1,0 +1,18 @@
+// crear redes sociales
+use("jimcostdev_api")
+db.social_networks.insertMany([
+    {
+        title: "github",
+        url: "https://github.com/JimcostDev",
+        username: "test"
+    },
+    {
+        title: "platzi",
+        url: "https://platzi.com/p/JimcostDev/",
+        username: "test"
+    },
+])
+
+// consultar redes sociales
+use("jimcostdev_api")
+db.social_networks.find({ username: "test" });

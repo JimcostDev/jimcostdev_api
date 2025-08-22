@@ -1,0 +1,13 @@
+// crear contacto
+use("jimcostdev_api")
+db.contact.insertOne({
+    nacionality: "Colombia",
+    phone_number: "(+34) 624 49 9125",
+    i_live_in: "Alcúdia, España",
+    email: "test@gmail.com",
+    username: "test"
+  })
+
+// consultar contacto
+use("jimcostdev_api")
+db.contact.find({ username: "test" });

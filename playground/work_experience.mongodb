@@ -1,0 +1,12 @@
+use("jimcostdev_api")
+db.work_experience.insertMany([
+    {
+        rol: "Docente de Programación",
+        company: "Freelance",
+        location: "Remoto",
+        activities: "Clases y tutoriales sobre programación y desarrollo de software.",
+        initial_date: "2022-10-01T00:00:00",
+        end_date: null,
+        username: "jimcostdev"
+    }
+])

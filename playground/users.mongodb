@@ -1,0 +1,15 @@
+
+// crear usuario
+use("jimcostdev_api")
+db.users.insertOne({
+  "confirm_password": "Cambiar123*",
+  "email": "test@gmail.com",
+  "full_name": "John Doe",
+  "password": "Cambiar123*",
+  "username": "test",
+	"secret":"test"
+});
+
+// consultar
+use("jimcostdev_api")
+db.users.find({ email: "test@gmail.com" });

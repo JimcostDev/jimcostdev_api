@@ -1,0 +1,27 @@
+
+// crear certificaciones
+use("jimcostdev_api")
+db.certifications.insertMany([
+  {
+      company: "Microsoft",
+      certification: "Azure Fundamentals",
+      link: "https://www.credly.com/badges/e8c1f177-3d1f-4496-9461-1b468ed30b4b/public_url",
+      username:"test"
+  },
+  {
+    company: "MongoDB",
+    certification: "MongoDB Associate Developer",
+    link: "https://www.credly.com/badges/e537a319-3e5b-456a-ac82-31c04834f30a/linked_in_profile",
+    username:"test"
+  },
+  {
+    company: "MongoDB",
+    certification: "MongoDB Associate DBA",
+    link: "https://www.credly.com/badges/11bbfef7-0dba-4b71-9005-76aa60020a48/linked_in",
+    username:"test"
+  },
+])
+
+// consultar certificaciones
+use("jimcostdev_api")
+db.certifications.find({ username: "test" });

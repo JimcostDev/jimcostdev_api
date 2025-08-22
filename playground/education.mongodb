@@ -1,0 +1,21 @@
+
+  // crear educación
+  use("jimcostdev_api")
+  db.education.insertMany([
+    {
+        company: "Universidad Internacional de La Rioja - UNIR",
+        career: "Ingeniería informática - 2025",
+        username: "test",
+        year: 2025
+    },
+    {
+        company: "Fundación Tecnológica Autónoma del Pacífico - UTAP",
+        career: "Tecnólogo en Diseño Gráfico - 2021",
+        username: "test",
+        year: 2021
+    }
+  ])
+
+// consultar educación
+use("jimcostdev_api")
+db.education.find({ username: "test" });

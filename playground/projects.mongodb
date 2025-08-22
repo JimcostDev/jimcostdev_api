@@ -1,0 +1,9 @@
+use("jimcostdev_api")
+db.projects.insertOne({
+    image: "https://github.com/JimcostDev/game-spades-fixed/raw/master/src/assets/picas-fijas-juego.webp",
+    title: "Picas y Fijas con Astro, Vue y Tailwind",
+    description: "Este proyecto implementa el juego de Picas y Fijas en un entorno Astro, utilizando Vue para la lógica del juego y Tailwind CSS para los estilos.",
+    stack: ['js','astro', 'vue', 'tailwind'],
+    link: "https://game-spades-fixed.vercel.app/",
+    username: "test"
+  })
