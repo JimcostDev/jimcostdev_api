@@ -1,8 +1,13 @@
 __pycache__/
 *.py[cod]
+*.pyo
+*.env
 .env
-venv/
+.env.local
+build/
+dist/
+*.egg-info
 .git
-.gitignore
-README.md
-tests/
+.vscode/
+.idea/
+.DS_Store
