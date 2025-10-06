@@ -1,5 +1,4 @@
-# fastapi[standard]
-fastapi==0.118.0
+fastapi[standard]
 pymongo
 motor
 pytest
