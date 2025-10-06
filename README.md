@@ -1,98 +1,107 @@
 # JimcostDev API
 
-API desarrollada con FastAPI para administrar de manera eficiente mi CV y portafolio profesional. Este proyecto surgió de la necesidad de contar con una página web personal para exhibir habilidades profesionales y generar un CV de manera automática.
+API REST desarrollada con FastAPI para gestionar dinámicamente los datos de mi CV y portafolio profesional. Este backend alimenta tanto mi sitio web personal como la versión descargable de mi currículum.
 
-## Tecnologías Utilizadas
+## 🌐 Ecosistema del Proyecto
 
-[![Python](https://img.shields.io/badge/Python-f6d44e?style=for-the-badge\&logo=python\&logoColor=white\&labelColor=101010)]()
-[![FastAPI](https://img.shields.io/badge/FastAPI-059487?style=for-the-badge\&logo=fastapi\&logoColor=white\&labelColor=101010)](https://fastapi.tiangolo.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-00Ed64?style=for-the-badge\&logo=mongodb\&logoColor=white\&labelColor=101010)]()
+Este repositorio forma parte de un ecosistema de 3 aplicaciones:
 
-## Instalación
+- **[jimcostdev_api](https://github.com/JimcostDev/jimcostdev_api)** - API REST (FastAPI + MongoDB) ← *Estás aquí*
+- **[jimcostdev-astro](https://github.com/JimcostDev/jimcostdev-astro)** - Sitio web principal (Astro + Tailwind CSS)
+- **[jimcostdev_cv](https://github.com/JimcostDev/jimcostdev_cv)** - CV descargable (HTML + SCSS + JavaScript)
 
-Sigue los siguientes pasos para instalar y ejecutar el proyecto localmente:
+## 🚀 Tecnologías Utilizadas
 
-1. **Clona este repositorio:**
+[![Python](https://img.shields.io/badge/Python-f6d44e?style=for-the-badge&logo=python&logoColor=white&labelColor=101010)]()
+[![FastAPI](https://img.shields.io/badge/FastAPI-059487?style=for-the-badge&logo=fastapi&logoColor=white&labelColor=101010)](https://fastapi.tiangolo.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-00Ed64?style=for-the-badge&logo=mongodb&logoColor=white&labelColor=101010)]()
 
-   ```bash
-   git clone https://github.com/JimcostDev/jimcostdev_api.git
-   ```
+## 📦 Instalación
 
-2. **Crea y activa un entorno virtual:**
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/JimcostDev/jimcostdev_api.git
+cd jimcostdev_api
+```
 
-   * En Windows:
+### 2. Crear y activar el entorno virtual
 
-     ```bash
-     python -m venv venv
-     venv\Scripts\activate
-     ```
-   * En macOS o Linux:
+**Windows:**
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
 
-     ```bash
-     python3 -m venv venv
-     source venv/bin/activate
-     ```
+**macOS / Linux:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
 
-3. **Instala las dependencias:**
+### 3. Instalar dependencias
+```bash
+pip install -r requirements.txt
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+**🔄 Actualizar dependencias (opcional):**
+```bash
+# Reinstalar todas las dependencias
+pip uninstall -y -r requirements.txt
+pip install -r requirements.txt
 
-   **🔄 Actualización de dependencias (opcional)**
-   Si deseas actualizar todas las dependencias desde cero:
+# Actualizar un paquete específico
+pip install --upgrade nombre-del-paquete
+```
 
-   ```bash
-   pip uninstall -y -r requirements.txt
-   pip install -r requirements.txt
-   ```
-   También puedes actualizar paquetes de forma individual: 
-   ```bash
-   pip install --upgrade nombre-del-paquete
-   ```
-4. **Configura las variables de entorno:**
-   Crea un archivo `config.env` dentro de la carpeta `app/core/` con el siguiente contenido:
+### 4. Configurar variables de entorno
 
-   ```dotenv
-   MONGO_URI=your_mongodb_connection_uri
-   JWT_SECRET_KEY=your_secret_key
-   ```
+Crea un archivo `config.env` dentro de `app/core/`:
 
-   *Alternativamente, puedes exportar estas variables desde tu sistema operativo.*
+```env
+MONGO_URI=your_mongodb_connection_uri
+JWT_SECRET_KEY=your_secret_key
+```
 
-5. **Configura la base de datos:**
-   Asegúrate de tener una base de datos llamada `jimcostdev_api` con las siguientes colecciones:
+*También puedes exportar estas variables directamente en tu sistema operativo.*
 
-   * `contact`
-   * `education`
-   * `perfil`
-   * `projects`
-   * `social_networks`
-   * `work_experience`
-   * `users`
+### 5. Configurar la base de datos
 
-6. **Dirígete al directorio de la aplicación:**
+Asegúrate de tener MongoDB instalado y crea una base de datos llamada `jimcostdev_api` con las siguientes colecciones:
 
-   ```bash
-   cd app
-   ```
+- `contact`
+- `education`
+- `perfil`
+- `projects`
+- `social_networks`
+- `work_experience`
+- `users`
 
-7. **Ejecuta el servidor de desarrollo:**
+### 6. Ejecutar el servidor
 
-   ```bash
-   fastapi dev main.py
-   ```
+```bash
+cd app
+fastapi dev main.py
+```
 
-Una vez iniciado, puedes acceder a la aplicación en tu navegador a través de `http://localhost:8000`.
+La API estará disponible en `http://localhost:8000`
 
-## Uso y Documentación
+## 📖 Documentación
 
-* Accede a la documentación interactiva de la API en:
+Accede a la documentación interactiva de la API:
 
-  * `http://localhost:8000/docs` (Swagger UI)
-  * `http://localhost:8000/redoc` (Redoc)
+- **Swagger UI:** `http://localhost:8000/docs`
+- **Redoc:** `http://localhost:8000/redoc`
 
-* También puedes utilizar herramientas como **Postman** o **Insomnia** para probar los endpoints de la API.
+También puedes usar herramientas como **Postman** o **Insomnia** para probar los endpoints.
 
----
+## 🤝 Contribuciones
 
+¡Las contribuciones son bienvenidas! Si deseas mejorar algo, abre un **pull request** o crea un **issue**.
+
+## 📜 Licencia
+
+Este proyecto está bajo la **Licencia MIT**. Consulta el archivo [LICENSE](./LICENSE) para más detalles.
+
+## 📬 Contacto
+
+Para más información, visita mi sitio web: [jimcostdev.com](https://jimcostdev.com)
